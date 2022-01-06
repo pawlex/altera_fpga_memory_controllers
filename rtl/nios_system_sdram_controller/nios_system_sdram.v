@@ -263,13 +263,17 @@ assign f_cs_n = 1'b0;
 assign cs_n = f_select ? f_cs_n : active_cs_n;
 assign csn_decode = cs_n;
 assign {f_rnw, f_addr, f_dqm, f_data} = fifo_read_data;
+assign za_waitrequest = (init_done) ? fifo_waitrequest : 1'b1; // hold wait until we've completed DRAM init -pk.
+wire fifo_waitrequest;
+
 efifo efifo0
       (
           .almost_empty (almost_empty),
           .almost_full  (almost_full),
           .clk          (clk),
           .empty        (f_empty),
-          .full         (za_waitrequest),
+          //.full         (za_waitrequest),
+          .full         (fifo_waitrequest),
           .rd           (f_select),
           .rd_data      (fifo_read_data),
           .reset_n      (reset_n),
