@@ -1,4 +1,5 @@
 *.bak
+/.qsys_edit
 /db
 /greybox_tmp
 /incremental_db
