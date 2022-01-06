@@ -1,11 +1,11 @@
-`timescale 1ns/100ps
+`timescale 10ns/10ns
 
 module tb();
 reg reset_n=0;
 reg clk=0;
 
 initial begin
-    forever #2 clk = ~clk;
+    forever #1 clk = ~clk;
 end
 
 
@@ -16,6 +16,8 @@ reg [15:0] i_data;
 reg [1:0]  i_be_n;
 
 
+integer my_address      = 0;
+integer my_data         = 0;
 initial begin
     reset_n = 0;
     i_addr = 22'h0;
@@ -24,26 +26,60 @@ initial begin
     i_rd_n = 1;
     i_be_n = 2'b00; // Byte enables, Controls the data mask (DM, DQM) on the DRAM.  High = enabled. Low = disable
 
-    #10;
+    repeat(10) @(posedge clk);
     reset_n = 1;
-    #25000
-     wait(wait_req == 0);
-    @(posedge clk);
-    i_addr = 22'h00babe;
-    i_data = 16'hd00d;
-    i_wr_n = 0;
-    wait(wait_req == 1);
-    @(posedge clk)
-     i_wr_n = 1;
-    i_addr = 22'h3ffffe;
-    i_data = 16'hfffe;
-    #10000 $finish;
+    wait(wait_req == 0); // INIT COMPLETE
+
+    repeat(100) @(posedge clk);
+    // START WRITES
+    while (my_address < 'd127) @(posedge clk)
+    begin
+        wait(wait_req == 0);
+        i_addr <= my_address[21:0];
+        i_data <= my_address;
+        i_wr_n <= 0;
+        wait(wait_req == 1);
+        i_wr_n <= 1;
+        @(posedge clk);
+        my_address <= my_address+1;
+    end
+
+    repeat(100) @(posedge clk);
+    // START READS
+    my_address = 0;
+    while (my_address < 'd127) @(posedge clk)
+    begin
+        wait(wait_req == 0);
+        i_addr <= my_address[21:0];
+        i_rd_n <= 0;
+        wait(wait_req == 1);
+        i_rd_n <= 1;
+        wait(valid == 1);
+        my_address <= my_address+1;
+    end
+
+
+    //
+    #1000 $finish;
 end
 
 initial begin
     $dumpfile ("dump.vcd");
     $dumpvars();
 end
+
+
+/*
+@(posedge clk);
+i_addr = 22'h00babe;
+i_data = 16'hd00d;
+i_wr_n = 0;
+wait(wait_req == 1);
+@(posedge clk)
+i_wr_n = 1;
+i_addr = 22'h3ffffe;
+i_data = 16'hfffe;
+*/
 
 /* SOME EXAMPLES
 initial begin
