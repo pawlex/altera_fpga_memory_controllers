@@ -1,0 +1,21 @@
+module sdram_init_reader_writer
+(
+	input clk,
+	input reset_n,
+	//
+	input i_valid,
+	input i_wait_req,
+	input [15:0]	i_data,
+	//
+	output o_rd_n,
+	output o_wr_n,
+	output [15:0]	o_data,
+	output [21:0] 	o_addr,
+	output [1:0]	o_be_n
+);
+endmodule
+
+wire i_rd_n, i_wr_n, o_valid, o_wait_req;
+wire [15:0] i_data, o_data;
+wire [21:0] i_addr;
+wire [1:0]  i_be_n; // Same as DRAM Data Mask
