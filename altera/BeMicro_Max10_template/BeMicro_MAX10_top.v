@@ -14,27 +14,22 @@
 //`define ENABLE_DAC_SPI_INTERFACE
 //`define ENABLE_TEMP_SENSOR
 //`define ENABLE_ACCELEROMETER
-//`define ENABLE_SDRAM
+`define ENABLE_SDRAM
 //`define ENABLE_SPI_FLASH
 //`define ENABLE_MAX10_ANALOG
 `define ENABLE_PUSHBUTTON
 `define ENABLE_LED_OUTPUT
 //`define ENABLE_EDGE_CONNECTOR
-`define ENABLE_HEADERS
-`define ENABLE_GPIO_J3
-`define ENABLE_GPIO_J4
-`define ENABLE_PMOD
+//`define ENABLE_HEADERS
+//`define ENABLE_GPIO_J3
+//`define ENABLE_GPIO_J4
+//`define ENABLE_PMOD
 //`define ENABLE_CHIPSCOPE
 `define DESIGN_LEVEL_RESET
 
 module BeMicro_MAX10_top (
 
-	/* Clock inputs, SYS_CLK = 50MHz, USER_CLK = 24MHz */	
-`ifdef ENABLE_CLOCK_INPUTS
-	//Voltage Level 3.3V
-	input SYS_CLK,  // 50MHz oscillator at position Y1.
-	input USER_CLK, // USER_CLK oscillator is not connected. Postition Y2.
-`endif
+
 
 `ifdef	ENABLE_DAC_SPI_INTERFACE
 	/* DAC, 12-bit, SPI interface (AD5681) */
@@ -264,9 +259,14 @@ module BeMicro_MAX10_top (
 	inout [3:0] PMOD_A,
 	inout [3:0] PMOD_B,
 	inout [3:0] PMOD_C,
-	inout [3:0] PMOD_D
+	inout [3:0] PMOD_D,
 `endif
 
+/* Clock inputs, SYS_CLK = 50MHz, USER_CLK = 24MHz */	
+`ifdef ENABLE_CLOCK_INPUTS
+	input SYS_CLK,  // 50MHz oscillator at position Y1.
+	input USER_CLK // USER_CLK oscillator is not connected. Postition Y2.
+`endif
 );
 
 `ifdef ENABLE_CHIPSCOPE
@@ -315,5 +315,37 @@ always @* begin
 	led_o[0]= 1'b0;
 end
 
+`ifdef ENABLE_SDRAM
+assign SDRAM_CLK = SYS_CLK;
 
+//
+wire i_rd_n, i_wr_n, o_valid, o_wait_req;
+wire [15:0] i_data, o_data;
+wire [21:0] i_addr;
+wire [1:0]  i_be_n; // Same as DRAM Data Mask
+
+nios_system_sdram sdram_0 (
+		 // inputs:
+		 .az_addr(i_addr),		//22
+		 .az_be_n(i_be_n),		//2
+		 .az_data(i_data),		//16
+		 .az_rd_n(i_rd_n),
+		 .az_wr_n(i_wr_n),
+		 .clk(SYS_CLK),
+		 .reset_n(reset_n),
+		 // outputs:
+		 .za_data(o_data), 		//16
+		 .za_valid(o_valid),
+		 .za_waitrequest(o_wait_req),
+		 .zs_addr(SDRAM_A), 		//12
+		 .zs_ba(SDRAM_BA),		//2
+		 .zs_cas_n(SDRAM_CASn),
+		 .zs_cke(SDRAM_CKE),
+		 .zs_cs_n(SDRAM_CSn),
+		 .zs_dq(SDRAM_DQ),	//16 b'z
+		 .zs_dqm({SDRAM_DQMH,SDRAM_DQML}),		//2
+		 .zs_ras_n(SDRAM_RASn),
+		 .zs_we_n(SDRAM_WEn)
+	);
+`endif
 endmodule
