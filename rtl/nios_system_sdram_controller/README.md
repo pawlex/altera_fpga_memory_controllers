@@ -3,4 +3,5 @@
 <p>The RTL is not well documented, and I may or may not fix this later, but for now writes appear to be working.  No reads have been simulated due to lack of BFM.</p>
 
 ![](nios_system_sdram_controller.png)
+![](spurious_raw.PNG)
 ![](Avalon_Waveform.png)
