@@ -1,17 +1,5 @@
-# BASIC Verilog and System Verilog Simulation Environment
-## Using icarus verilog and gtkwave
+# Altera SDRAM memory controller with 2 entry EFIFO and AVALON Interface (old style) ?
+<p>I do not have a BFM for the simulation here, nor is the RTL written with any delays, so sim is a crap-shoot.  However, I have noticed that if incorrect timing is used with respect to WR# signal, then a spurious read will occur.</p>
+<p>The RTL is not well documented, and I may or may not fix this later, but for now writes appear to be working.  No reads have been simulated due to lack of BFM.</p>
 
-### Components
-tb.v : test bench stimuli
-
-top.v: top level module
-
-compile: compiles and runs simulation and launches gtk-wave with the output .vcd
-### Requirements
-Linux env
-
-Icarus verilog compiler [apt-get install iverilog]
-
-GTKWAVE [apt-get install gtkwave]
-
-![gtkwave](gtkwave.png)
+![](Avalon_Waveform.png)
