@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 // FIFO MODULE
-module nios_system_sdram_input_efifo_module (
+module efifo (
            // inputs:
            clk,
            rd,
@@ -263,19 +263,19 @@ assign f_cs_n = 1'b0;
 assign cs_n = f_select ? f_cs_n : active_cs_n;
 assign csn_decode = cs_n;
 assign {f_rnw, f_addr, f_dqm, f_data} = fifo_read_data;
-nios_system_sdram_input_efifo_module the_nios_system_sdram_input_efifo_module
-                                     (
-                                         .almost_empty (almost_empty),
-                                         .almost_full  (almost_full),
-                                         .clk          (clk),
-                                         .empty        (f_empty),
-                                         .full         (za_waitrequest),
-                                         .rd           (f_select),
-                                         .rd_data      (fifo_read_data),
-                                         .reset_n      (reset_n),
-                                         .wr           ((~az_wr_n | ~az_rd_n) & !za_waitrequest),
-                                         .wr_data      ({az_wr_n, az_addr, az_wr_n ? 2'b0 : az_be_n, az_data})
-                                     );
+efifo efifo0
+      (
+          .almost_empty (almost_empty),
+          .almost_full  (almost_full),
+          .clk          (clk),
+          .empty        (f_empty),
+          .full         (za_waitrequest),
+          .rd           (f_select),
+          .rd_data      (fifo_read_data),
+          .reset_n      (reset_n),
+          .wr           ((~az_wr_n | ~az_rd_n) & !za_waitrequest),
+          .wr_data      ({az_wr_n, az_addr, az_wr_n ? 2'b0 : az_be_n, az_data})
+      );
 
 assign f_bank = {f_addr[21],f_addr[8]};
 // Refresh/init counter.

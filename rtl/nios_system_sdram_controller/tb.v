@@ -22,29 +22,21 @@ initial begin
     i_data = 16'h0;
     i_wr_n = 1;
     i_rd_n = 1;
-    //i_be_n = 2'b11; // I think this is only for reads.
-    i_be_n = 2'b00; // I think this is only for reads.
+    i_be_n = 2'b00; // Byte enables, Controls the data mask (DM, DQM) on the DRAM.  High = enabled. Low = disable
 
     #10;
     reset_n = 1;
-    #25000 
-    wait(wait_req == 0);
-    @(negedge clk);
-    //wait(wait_req == 1); 
-	    i_addr = 22'h00babe;
-	    i_data = 16'hd00d;
-	    i_wr_n = 0;
-	    //i_be_n = 0;
-    //wait(wait_req == 1); 
-    //wait(wait_req == 0);
-    @(posedge clk); 
-    @(negedge clk); 
-    @(posedge clk); 
-    @(negedge clk); 
-	    i_addr = 22'hfffffe;
-	    i_data = 16'hfffffe;
-	    i_wr_n = 1;
-	    //i_be_n = 3;
+    #25000
+     wait(wait_req == 0);
+    @(posedge clk);
+    i_addr = 22'h00babe;
+    i_data = 16'hd00d;
+    i_wr_n = 0;
+    wait(wait_req == 1);
+    @(posedge clk)
+     i_wr_n = 1;
+    i_addr = 22'h3ffffe;
+    i_data = 16'hfffe;
     #10000 $finish;
 end
 
@@ -53,7 +45,7 @@ initial begin
     $dumpvars();
 end
 
-/* SOME EXAMPLES 
+/* SOME EXAMPLES
 initial begin
     repeat(4) @(posedge clk);
     reset <= 0;
@@ -82,29 +74,29 @@ wire cs, cke, cas, ras, we, valid;
 wire wait_req;
 
 nios_system_sdram SDRAM (
-        // inputs:
-       .az_addr(i_addr),		//22
-       .az_be_n(i_be_n),		//2
-       .az_data(i_data),		//16
-       .az_rd_n(i_rd_n),
-       .az_wr_n(i_wr_n),
-       .clk(clk),
-       .reset_n(reset_n),
+                      // inputs:
+                      .az_addr(i_addr),		//22
+                      .az_be_n(i_be_n),		//2
+                      .az_data(i_data),		//16
+                      .az_rd_n(i_rd_n),
+                      .az_wr_n(i_wr_n),
+                      .clk(clk),
+                      .reset_n(reset_n),
 
-        // outputs:
-        .za_data(fifo_rrd), 		//16
-        .za_valid(valid),
-        .za_waitrequest(wait_req),
-        .zs_addr(dram_addr), 		//12
-        .zs_ba(dram_bank_addr),		//2
-        .zs_cas_n(cas),
-        .zs_cke(cke),
-        .zs_cs_n(cs),
-        .zs_dq(dram_data),	//16 b'z
-        .zs_dqm(dram_data_mask),		//2
-        .zs_ras_n(ras),
-        .zs_we_n(we)
-    );
+                      // outputs:
+                      .za_data(fifo_rrd), 		//16
+                      .za_valid(valid),
+                      .za_waitrequest(wait_req),
+                      .zs_addr(dram_addr), 		//12
+                      .zs_ba(dram_bank_addr),		//2
+                      .zs_cas_n(cas),
+                      .zs_cke(cke),
+                      .zs_cs_n(cs),
+                      .zs_dq(dram_data),	//16 b'z
+                      .zs_dqm(dram_data_mask),		//2
+                      .zs_ras_n(ras),
+                      .zs_we_n(we)
+                  );
 
 
 endmodule
