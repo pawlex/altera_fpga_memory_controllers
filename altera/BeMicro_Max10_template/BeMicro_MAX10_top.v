@@ -20,16 +20,15 @@
 `define ENABLE_PUSHBUTTON
 `define ENABLE_LED_OUTPUT
 //`define ENABLE_EDGE_CONNECTOR
-//`define ENABLE_HEADERS
+`define ENABLE_HEADERS
 //`define ENABLE_GPIO_J3
-//`define ENABLE_GPIO_J4
+`define ENABLE_GPIO_J4
 //`define ENABLE_PMOD
-//`define ENABLE_CHIPSCOPE
+`define ENABLE_CHIPSCOPE
 `define DESIGN_LEVEL_RESET
+`define ENABLE_PLL_0
 
 module BeMicro_MAX10_top (
-
-
 
 `ifdef	ENABLE_DAC_SPI_INTERFACE
 	/* DAC, 12-bit, SPI interface (AD5681) */
@@ -281,7 +280,12 @@ module BeMicro_MAX10_top (
 `ifdef DESIGN_LEVEL_RESET
 	/* TODO:  Find out how to use Altera GSR */
 	parameter SYS_CLK_FREQ = 'd50_000_000;
-	wire reset,reset_n;assign reset = ~reset_n;assign reset_n = user_reset_cpl;
+	`ifdef ENABLE_PLL_0
+		assign reset_n = (user_reset_cpl & pll_0_lock);
+	`else
+		assign reset_n = user_reset_cpl;
+	`endif
+	wire reset,reset_n;assign reset = ~reset_n;
 	reg [25:0] user_reset_cntr;reg [0:0] user_reset_cpl;
 	wire user_reset_button; assign user_reset_button = ~PB[1];
 	//wire user_debug_counter; assign user_debug_counter = ~PB[2];
@@ -302,13 +306,28 @@ module BeMicro_MAX10_top (
 	end
 `endif
 
+`ifdef ENABLE_PLL_0
+wire clk50p0, clk60p0, clk75p0, clk80p0, clk100p0, pll_0_lock;
+pll_0	pll_0_inst (
+	.inclk0 ( SYS_CLK ),
+	.c0 ( clk50p0 ),
+	.c1 ( clk60p0 ),
+	.c2 ( clk75p0 ),
+	.c3 ( clk80p0 ),
+	.c4 ( clk100p0 ),
+	.locked ( pll_0_lock )
+	);
+`endif
+
+
+
 /* LED SWAPPING and assigns */
 reg [7:0] led_o; assign USER_LED[8:1] = ~led_o;
 always @* begin
 	led_o[7]= reset_n; // Assert LED while device is in RESET
-	led_o[6]= 1'b0;
-	led_o[5]= 1'b0;
-	led_o[4]= 1'b0;
+	led_o[6]= o_ram_error;
+	led_o[5]= o_ram_reading;
+	led_o[4]= o_ram_writing;
 	led_o[3]= 1'b0;
 	led_o[2]= 1'b0;
 	led_o[1]= 1'b0;
@@ -316,36 +335,51 @@ always @* begin
 end
 
 `ifdef ENABLE_SDRAM
-assign SDRAM_CLK = SYS_CLK;
-
-//
-wire i_rd_n, i_wr_n, o_valid, o_wait_req;
+assign SDRAM_CLK = clk100p0;
+wire i_rd_n, i_wr_n, o_valid, o_wait_req, o_ram_error, o_ram_reading, o_ram_writing;
 wire [15:0] i_data, o_data;
 wire [21:0] i_addr;
 wire [1:0]  i_be_n; // Same as DRAM Data Mask
-
+sdram_init_reader_writer mem_init (
+	.clk(SDRAM_CLK),
+	.reset_n(reset_n),
+	.i_valid(o_valid),
+	.i_wait_req(o_wait_req),
+	.i_data(o_data),
+	.i_trigger(1'b1),
+	.o_rd_n(i_rd_n),
+	.o_wr_n(i_wr_n),
+	.o_data(i_data),
+	.o_addr(i_addr),
+	.o_be_n(i_be_n),
+	.o_error(o_ram_error),
+	.o_ram_reading(o_ram_reading),
+	.o_ram_writing(o_ram_writing),
+	.o_debug(DEBUG)
+);
 nios_system_sdram sdram_0 (
-		 // inputs:
-		 .az_addr(i_addr),		//22
-		 .az_be_n(i_be_n),		//2
-		 .az_data(i_data),		//16
-		 .az_rd_n(i_rd_n),
-		 .az_wr_n(i_wr_n),
-		 .clk(SYS_CLK),
-		 .reset_n(reset_n),
-		 // outputs:
-		 .za_data(o_data), 		//16
-		 .za_valid(o_valid),
-		 .za_waitrequest(o_wait_req),
-		 .zs_addr(SDRAM_A), 		//12
-		 .zs_ba(SDRAM_BA),		//2
-		 .zs_cas_n(SDRAM_CASn),
-		 .zs_cke(SDRAM_CKE),
-		 .zs_cs_n(SDRAM_CSn),
-		 .zs_dq(SDRAM_DQ),	//16 b'z
-		 .zs_dqm({SDRAM_DQMH,SDRAM_DQML}),		//2
-		 .zs_ras_n(SDRAM_RASn),
-		 .zs_we_n(SDRAM_WEn)
+	// inputs:
+	.az_addr(i_addr),		//22
+	.az_be_n(i_be_n),		//2
+	.az_data(i_data),		//16
+	.az_rd_n(i_rd_n),
+	.az_wr_n(i_wr_n),
+	.clk(SDRAM_CLK),
+	.reset_n(reset_n),
+	// outputs:
+	.za_data(o_data), 		//16
+	.za_valid(o_valid),
+	.za_waitrequest(o_wait_req),
+	.zs_addr(SDRAM_A), 		//12
+	.zs_ba(SDRAM_BA),		//2
+	.zs_cas_n(SDRAM_CASn),
+	.zs_cke(SDRAM_CKE),
+	.zs_cs_n(SDRAM_CSn),
+	.zs_dq(SDRAM_DQ),	//16 b'z
+	.zs_dqm({SDRAM_DQMH,SDRAM_DQML}),		//2
+	.zs_ras_n(SDRAM_RASn),
+	.zs_we_n(SDRAM_WEn)
 	);
 `endif
+
 endmodule

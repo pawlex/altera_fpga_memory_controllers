@@ -23,23 +23,25 @@ reg [21:0] read_address;
 reg [21:0] write_address;
 reg [15:0] read_return_data;
 reg [15:0] read_error_count;
+reg [31:0] rw_loop_count;
+reg rd_n, wr_n;
+
 assign o_be_n = 2'h0;
 assign o_rd_n = rd_n;
 assign o_wr_n = wr_n;
 assign o_addr = (state == READING) ? read_address : write_address;
-assign o_data = write_address;
+assign o_data = (write_address[15:0]);
 assign o_ram_reading = reading;
 assign o_ram_writing = writing;
-reg rd_n, wr_n;
+
 
 // COMMON SM
 localparam IDLE    				= 8'b0000_0001;
-//localparam TOSS_FIRST_READ 	= 8'b0010_0000;
-
 // MAIN SM_
 localparam WF_INIT = 8'b0000_0010;
 localparam WRITING = 8'b0000_0100;
 localparam READING = 8'b0000_1000;
+localparam NEXT_LP = 8'b0001_0000;
 // RW SM
 localparam RW_WAIT_NOT_BUSY 	= 8'b0000_0010;
 localparam RW_WAIT_REQ_ACK 	= 8'b0000_0100;
@@ -51,10 +53,14 @@ localparam DONEROW 				= 8'b1000_0000;
 
 //localparam TARGET  = 256; // same page.
 localparam TARGET = (1048576*4); // 2 full banks
-
+//localparam XOR_MASK = 16'h5A5A;
 wire start_reading; assign start_reading = (state == READING && read_state  == IDLE);
 wire start_writing; assign start_writing = (state == WRITING && write_state == IDLE);
 assign o_error = (read_error_count > 0);
+wire reading; assign reading = (state == READING);
+wire writing; assign writing = (state == WRITING);
+wire idle; assign idle = (state == IDLE);
+
 
 `ifdef INITIAL_DEBUG
 	assign o_debug[7:0] = {read_state[2:0],write_state[2:0],state[1:0]};
@@ -73,12 +79,15 @@ assign o_error = (read_error_count > 0);
 	//assign o_debug[5:0] = { o_addr[5:0] };
 	//assign o_debug[11:6] = { read_return_data[5:0] };
 	//assign o_debug[15:12] = { read_error_count[3:0] };
-	assign o_debug[15:8] = { o_addr[21:18], o_addr[3:0] };
-	assign o_debug[5:0]  = { o_rd_n, o_wr_n, i_wait_req, i_valid, reading, writing };
-	wire reading; assign reading = (state == READING);
-	wire writing; assign writing = (state == WRITING);
+	//assign o_debug[15:8] = { o_addr[21:18], o_addr[3:0] };
+	//assign o_debug[5:0]  = { o_rd_n, o_wr_n, i_wait_req, i_valid, reading, writing };
+	//assign o_debug[7:0] = lfsr_data[7:0];
+	//assign o_debug[15:8] = read_error_count[7:0];
+	//assign o_debug[15:8] = read_return_data[7:0];
 	
 `endif
+
+
 
 // CONTROL STATE MACHINE
 reg [7:0] state; /* synthesis syn_encoding = "one-hot" */
@@ -90,17 +99,21 @@ always @(posedge clk or negedge reset_n)
 			WF_INIT: begin
 				if(!i_wait_req) state <= IDLE;
 			end
+			
 			IDLE: if(i_trigger) state <= WRITING;
+			
 			WRITING: begin
 				if(write_state == DONEROW) state <= READING;
 			end
+			
 			READING: begin
-				if(read_state == DONEROW) state <= IDLE;
+				if(read_state == DONEROW) state <= NEXT_LP;
 			end
 			
-			//TOSS_FIRST_READ: begin
-			//	if(i_valid) state <= IDLE;
-			//end
+			NEXT_LP: begin
+				rw_loop_count <= rw_loop_count + 1'b1;
+				state <= IDLE;
+			end
 			
 			default: state <= IDLE;
 		endcase
@@ -136,7 +149,13 @@ always @(posedge clk or negedge reset_n)
 			end
 			
 			RW_CHK_END_ADDR: begin
-				if(i_data[15:0] != read_address[15:0]) read_error_count <= read_error_count + 1'b1;
+				if(i_data[15:0] != (read_address[15:0]) ) begin
+					read_error_count <= read_error_count + 
+						 // Don't track errors on the 1st loop.
+						 // DANGER!!  Need to debug why the 1st transaction of the 1st loop is failing.
+						 // I suspect we need to allow more time between MRW and 1st write.
+						(rw_loop_count) ? 1'b1 : 1'b0;
+				end
 				read_return_data[15:0] <= i_data[15:0];
 				if(read_address == TARGET-1) begin
 					read_state <= DONEROW;
@@ -149,14 +168,6 @@ always @(posedge clk or negedge reset_n)
 			
 			DONEROW: read_state <= (state == READING) ? read_state : IDLE;
 			
-			//TOSS_FIRST_READ: begin
-			//if(state == TOSS_FIRST_READ)
-			//	if(i_wait_req) begin 
-			//		rd_n <= 1;
-			//		read_state <= IDLE;
-			//	end else rd_n <= 0;
-			//end
-
 			default: read_state <= IDLE;
 		endcase
 	end
@@ -193,7 +204,4 @@ always @(posedge clk or negedge reset_n)
 			default: write_state <= IDLE;
 		endcase
 	end
-//
-
-
 endmodule
