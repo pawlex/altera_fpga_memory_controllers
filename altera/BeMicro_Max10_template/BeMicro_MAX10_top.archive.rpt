@@ -1,5 +1,5 @@
 Archive Project report for BeMicro_MAX10_top
-Thu Jan  6 12:24:07 2022
+Thu Jan  6 22:29:56 2022
 Quartus Prime Version 21.1.0 Build 842 10/21/2021 SJ Lite Edition
 
 
@@ -36,7 +36,7 @@ https://fpgasoftware.intel.com/eula.
 +----------------------------------------------------------------+
 ; Archive Project Summary                                        ;
 +------------------------+---------------------------------------+
-; Archive Project Status ; Successful - Thu Jan  6 12:24:07 2022 ;
+; Archive Project Status ; Successful - Thu Jan  6 22:29:56 2022 ;
 ; Revision Name          ; BeMicro_MAX10_top                     ;
 ; Top-level Entity Name  ; BeMicro_MAX10_top                     ;
 ; Family                 ; MAX 10                                ;
@@ -54,16 +54,16 @@ Info: Archive will store files relative to the closest common parent directory
 Info (13213): Using common directory /media/sf_tmp/altera_fpga_memory_controllers/
 Info: ----------------------------------------------------------
 Info: ----------------------------------------------------------
-Info: Generated archive '/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/nios_memory_controller_2022010600.qar'
+Info: Generated archive '/media/sf_tmp/altera_fpga_memory_controllers/release/nios_memory_controller_2022010601.qar'
 Info: ----------------------------------------------------------
 Info: ----------------------------------------------------------
 Info: Generated report 'BeMicro_MAX10_top.archive.rpt'
 Info (23030): Evaluation of Tcl script /opt/intelFPGA_lite/21.1/quartus/common/tcl/apps/qpm/qar.tcl was successful
-Info: Quartus Prime Shell was successful. 0 errors, 24 warnings
+Info: Quartus Prime Shell was successful. 0 errors, 1 warning
     Info: Peak virtual memory: 596 megabytes
-    Info: Processing ended: Thu Jan  6 12:24:07 2022
-    Info: Elapsed time: 00:00:19
-    Info: Total CPU time (on all processors): 00:00:28
+    Info: Processing ended: Thu Jan  6 22:29:56 2022
+    Info: Elapsed time: 00:00:01
+    Info: Total CPU time (on all processors): 00:00:01
 
 
 +----------------------------------------------------------------------------------------------------------+
@@ -76,6 +76,8 @@ Info: Quartus Prime Shell was successful. 0 errors, 24 warnings
 ; ../../rtl/nios_system_sdram_controller/sdram_init_reader_writer.v                                        ;
 ; /media/sf_tmp/altera_fpga_memory_controllers/rtl/nios_system_sdram_controller/lfsr.v                     ;
 ; /media/sf_tmp/altera_fpga_memory_controllers/rtl/nios_system_sdram_controller/nios_system_sdram.v        ;
+; /media/sf_tmp/altera_fpga_memory_controllers/rtl/nios_system_sdram_controller/nios_system_sdram_ifdefs.v ;
+; /media/sf_tmp/altera_fpga_memory_controllers/rtl/nios_system_sdram_controller/nios_system_sdram_params.v ;
 ; /media/sf_tmp/altera_fpga_memory_controllers/rtl/nios_system_sdram_controller/sdram_init_reader_writer.v ;
 ; /opt/intelFPGA_lite/21.1/quartus/linux64/assignment_defaults.qdf                                         ;
 ; BeMicro_MAX10_top.qpf                                                                                    ;
@@ -87,6 +89,11 @@ Info: Quartus Prime Shell was successful. 0 errors, 24 warnings
 ; pll_0.v                                                                                                  ;
 ; pll_0_bb.v                                                                                               ;
 ; pll_0_inst.v                                                                                             ;
+; pll_1.ppf                                                                                                ;
+; pll_1.qip                                                                                                ;
+; pll_1.v                                                                                                  ;
+; pll_1_bb.v                                                                                               ;
+; pll_1_inst.v                                                                                             ;
 +----------------------------------------------------------------------------------------------------------+
 
 

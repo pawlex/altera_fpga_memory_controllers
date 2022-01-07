@@ -27,6 +27,7 @@
 `define ENABLE_CHIPSCOPE
 `define DESIGN_LEVEL_RESET
 `define ENABLE_PLL_0
+`define ENABLE_PLL_1
 
 module BeMicro_MAX10_top (
 
@@ -62,7 +63,7 @@ module BeMicro_MAX10_top (
 `ifdef ENABLE_SDRAM
 	/* 8MB SDRAM, ISSI IS42S16400J-7TL SDRAM device */
 	// Voltage Level 3.3V
-	output [12:0] SDRAM_A,
+	output [11:0] SDRAM_A,
 	output [1:0] SDRAM_BA,
 	output SDRAM_CASn,
 	output SDRAM_CKE,
@@ -280,11 +281,14 @@ module BeMicro_MAX10_top (
 `ifdef DESIGN_LEVEL_RESET
 	/* TODO:  Find out how to use Altera GSR */
 	parameter SYS_CLK_FREQ = 'd50_000_000;
-	`ifdef ENABLE_PLL_0
-		assign reset_n = (user_reset_cpl & pll_0_lock);
-	`else
-		assign reset_n = user_reset_cpl;
-	`endif
+	//`ifdef ENABLE_PLL_0
+	//	assign reset_n = (user_reset_cpl & pll_0_lock);
+	//`else
+	//	assign reset_n = user_reset_cpl;
+	//`endif
+	assign reset_n = 
+	 (user_reset_cpl `ifdef ENABLE_PLL_0 & pll_0_lock `endif `ifdef ENABLE_PLL_1 & pll_1_lock `endif);
+	
 	wire reset,reset_n;assign reset = ~reset_n;
 	reg [25:0] user_reset_cntr;reg [0:0] user_reset_cpl;
 	wire user_reset_button; assign user_reset_button = ~PB[1];
@@ -307,19 +311,31 @@ module BeMicro_MAX10_top (
 `endif
 
 `ifdef ENABLE_PLL_0
-wire clk50p0, clk60p0, clk75p0, clk80p0, clk100p0, pll_0_lock;
+//wire clk8p0, clk16p6, clk33p3, clk66p6, clk133p0, pll_0_lock;
+wire clk120p0, clk109p0, pll_0_lock;
 pll_0	pll_0_inst (
 	.inclk0 ( SYS_CLK ),
-	.c0 ( clk50p0 ),
-	.c1 ( clk60p0 ),
-	.c2 ( clk75p0 ),
-	.c3 ( clk80p0 ),
-	.c4 ( clk100p0 ),
+	.c0 ( clk120p0 ),
+	.c1 ( clk109p0 ),
+	//.c2 ( clk33p3 ),
+	//.c3 ( clk16p6 ),
+	//.c4 ( clk8p0 ),
 	.locked ( pll_0_lock )
 	);
 `endif
 
-
+`ifdef ENABLE_PLL_1
+wire clk125p0, clk100p0, clk25p0, clk10p0, clk1p0, pll_1_lock;
+pll_1	pll_1_inst (
+	.inclk0 ( SYS_CLK ),
+	.c0 ( clk125p0 ),
+	.c1 ( clk100p0 ),
+	.c2 ( clk25p0 ),
+	.c3 ( clk10p0 ),
+	.c4 ( clk1p0 ),
+	.locked ( pll_1_lock )
+	);
+`endif
 
 /* LED SWAPPING and assigns */
 reg [7:0] led_o; assign USER_LED[8:1] = ~led_o;
@@ -328,16 +344,17 @@ always @* begin
 	led_o[6]= o_ram_error;
 	led_o[5]= o_ram_reading;
 	led_o[4]= o_ram_writing;
-	led_o[3]= 1'b0;
-	led_o[2]= 1'b0;
-	led_o[1]= 1'b0;
-	led_o[0]= 1'b0;
+	led_o[3]= o_read_error_count[3];
+	led_o[2]= o_read_error_count[2];
+	led_o[1]= o_read_error_count[1];
+	led_o[0]= o_read_error_count[0];
 end
 
 `ifdef ENABLE_SDRAM
-assign SDRAM_CLK = clk100p0;
+assign SDRAM_CLK = clk120p0;
+//assign SDRAM_CLK = SYS_CLK;
 wire i_rd_n, i_wr_n, o_valid, o_wait_req, o_ram_error, o_ram_reading, o_ram_writing;
-wire [15:0] i_data, o_data;
+wire [15:0] i_data, o_data, o_read_error_count;
 wire [21:0] i_addr;
 wire [1:0]  i_be_n; // Same as DRAM Data Mask
 sdram_init_reader_writer mem_init (
@@ -355,6 +372,7 @@ sdram_init_reader_writer mem_init (
 	.o_error(o_ram_error),
 	.o_ram_reading(o_ram_reading),
 	.o_ram_writing(o_ram_writing),
+	.o_read_error_count(o_read_error_count),
 	.o_debug(DEBUG)
 );
 nios_system_sdram sdram_0 (
