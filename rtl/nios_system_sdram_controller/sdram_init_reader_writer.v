@@ -1,3 +1,13 @@
+// -----------------------------------------------------------------------------
+// Copyright (c) 2021 All rights reserved
+// -----------------------------------------------------------------------------
+// Author : paul komurka (pawl) pawlex@gmail.com
+// File   : sdram_init_reader_writer.v
+// Create : 2021-12-12
+// Revise : 1.0
+// Editor : vim/quartus
+// -----------------------------------------------------------------------------
+
 module sdram_init_reader_writer
 (
 	input clk,
@@ -16,84 +26,61 @@ module sdram_init_reader_writer
 	output [15:0] o_data,
 	output [21:0] o_addr,
 	output [1:0] o_be_n,
-	output [15:0] o_debug
+	output [15:0] o_debug,
+	output reg [15:0] o_read_error_count
+	
 );
-//
+`include "nios_system_sdram_params.v"
 reg [21:0] read_address;
 reg [21:0] write_address;
 reg [15:0] read_return_data;
-reg [15:0] read_error_count;
+reg [15:0] read_expected_data;
 reg [31:0] rw_loop_count;
-reg rd_n, wr_n;
+reg [7:0]  valid_pipe; /* synthesis syn_keep syn_encoding="one-hot" */
+reg [15:0] read_data_xor_ff;
+reg rd_n, wr_n,read_error_ff;
 
 assign o_be_n = 2'h0;
 assign o_rd_n = rd_n;
 assign o_wr_n = wr_n;
-assign o_addr = (state == READING) ? read_address : write_address;
-assign o_data = (write_address[15:0]);
+assign o_addr = reading ? read_address : write_address;
+assign o_data = (data_pattern);
 assign o_ram_reading = reading;
 assign o_ram_writing = writing;
+assign o_error = (o_read_error_count > 0);
 
 
-// COMMON SM
-localparam IDLE    				= 8'b0000_0001;
-// MAIN SM_
-localparam WF_INIT = 8'b0000_0010;
-localparam WRITING = 8'b0000_0100;
-localparam READING = 8'b0000_1000;
-localparam NEXT_LP = 8'b0001_0000;
-// RW SM
-localparam RW_WAIT_NOT_BUSY 	= 8'b0000_0010;
-localparam RW_WAIT_REQ_ACK 	= 8'b0000_0100;
-localparam R_WAIT_VALID 		= 8'b0000_1000;
-localparam W_NOP 					= 8'b0000_1000;
-localparam RW_CHK_END_ADDR	   = 8'b0001_0000;
-localparam DONEROW 				= 8'b1000_0000;
+wire start_reading; assign start_reading = (reading & read_state[0] );
+wire start_writing; assign start_writing = (writing & write_state[0]);
+wire done_reading; assign done_reading = read_state[7];
+wire done_writing; assign done_writing = write_state[7];
+wire reading; assign reading = state[3];
+wire writing; assign writing = state[2];
+wire idle; assign idle = state[2];
+wire read_error; assign read_error = (read_data_xor_ff && rw_loop_count);
+wire [15:0] read_data_xor; assign read_data_xor = (read_return_data[15:0] ^ read_expected_data[15:0]);
+wire [15:0] data_pattern; 
 
+/*
+	PICK YOUR DATA PATTERN
+*/
+//`define DATA_EQ_ADDRESS
+//`define DATA_EQ_LFSR
+//`define DATA_EQ_ADDR_XOR
+`define DATA_EQ_ADDR_XOR_LFSR
+// Enable CHIPSCOPE
+`define DEBUG
 
-//localparam TARGET  = 256; // same page.
-localparam TARGET = (1048576*4); // 2 full banks
-//localparam XOR_MASK = 16'h5A5A;
-wire start_reading; assign start_reading = (state == READING && read_state  == IDLE);
-wire start_writing; assign start_writing = (state == WRITING && write_state == IDLE);
-assign o_error = (read_error_count > 0);
-wire reading; assign reading = (state == READING);
-wire writing; assign writing = (state == WRITING);
-wire idle; assign idle = (state == IDLE);
+///////////////////////////////////////////////////////
+`include "nios_system_sdram_ifdefs.v"
+///////////////////////////////////////////////////////
 
-
-`ifdef INITIAL_DEBUG
-	assign o_debug[7:0] = {read_state[2:0],write_state[2:0],state[1:0]};
-	assign o_debug[11:8] = {o_rd_n, o_wr_n, i_wait_req,i_trigger};
-	assign o_debug[15:12] = read_error_count[3:0];
-`endif
-
-`define DATA_DEBUG
-`ifdef DATA_DEBUG
-	//assign o_debug[7:0]  = read_address_ff[7:0];
-	//assign o_debug[15:8] = read_return_data[7:0];
-	//assign o_debug[7:0]  = read_address[7:0];
-	//assign o_debug[15:8] = i_data[7:0];
-	//assign o_debug[15:0] = {write_state[3:0],read_state[5:0], state[5:0]};
-	//assign o_debug[7:0]  = {writet_state[2:0]};
-	//assign o_debug[5:0] = { o_addr[5:0] };
-	//assign o_debug[11:6] = { read_return_data[5:0] };
-	//assign o_debug[15:12] = { read_error_count[3:0] };
-	//assign o_debug[15:8] = { o_addr[21:18], o_addr[3:0] };
-	//assign o_debug[5:0]  = { o_rd_n, o_wr_n, i_wait_req, i_valid, reading, writing };
-	//assign o_debug[7:0] = lfsr_data[7:0];
-	//assign o_debug[15:8] = read_error_count[7:0];
-	//assign o_debug[15:8] = read_return_data[7:0];
-	
-`endif
-
-
-
-// CONTROL STATE MACHINE
+// BEGIN CONTROL_STATE;
 reg [7:0] state; /* synthesis syn_encoding = "one-hot" */
 always @(posedge clk or negedge reset_n)
 	if(!reset_n) begin
 		state <= WF_INIT;
+		rw_loop_count <= 0;
 	end else begin
 		case(state) /* synthesis syn_encoding = "one-hot" */
 			WF_INIT: begin
@@ -103,31 +90,33 @@ always @(posedge clk or negedge reset_n)
 			IDLE: if(i_trigger) state <= WRITING;
 			
 			WRITING: begin
-				if(write_state == DONEROW) state <= READING;
+				if(done_writing) state <= READING;
 			end
 			
 			READING: begin
-				if(read_state == DONEROW) state <= NEXT_LP;
+				if(done_reading) state <= NEXT_LP;
 			end
 			
 			NEXT_LP: begin
 				rw_loop_count <= rw_loop_count + 1'b1;
-				state <= IDLE;
+				/* Change this in params.v: RW_MODE = (READING|WRITING);
+					READING = write once, read forever.
+					WRITING = write then read forever.
+				*/
+				state <= RW_MODE;
 			end
 			
 			default: state <= IDLE;
 		endcase
 	end
-//
+// END CONTROL_STATE;
 
-// READER STATE MACHINE
+// BEGIN READ_STATE;
 reg [7:0] read_state; /* synthesis syn_encoding = "one-hot" */
 always @(posedge clk or negedge reset_n)
 	if(!reset_n) begin
 		read_state <= IDLE;
-		read_return_data <= 0;
 		read_address <= 0;
-		read_error_count <= 0;
 	end else begin
 		case(read_state) /* synthesis syn_encoding = "one-hot" */
 			IDLE: begin
@@ -149,14 +138,6 @@ always @(posedge clk or negedge reset_n)
 			end
 			
 			RW_CHK_END_ADDR: begin
-				if(i_data[15:0] != (read_address[15:0]) ) begin
-					read_error_count <= read_error_count + 
-						 // Don't track errors on the 1st loop.
-						 // DANGER!!  Need to debug why the 1st transaction of the 1st loop is failing.
-						 // I suspect we need to allow more time between MRW and 1st write.
-						(rw_loop_count) ? 1'b1 : 1'b0;
-				end
-				read_return_data[15:0] <= i_data[15:0];
 				if(read_address == TARGET-1) begin
 					read_state <= DONEROW;
 					read_address <= 0;
@@ -166,15 +147,37 @@ always @(posedge clk or negedge reset_n)
 				end
 			end
 			
-			DONEROW: read_state <= (state == READING) ? read_state : IDLE;
+			DONEROW: read_state <= (reading) ? read_state : IDLE;
 			
 			default: read_state <= IDLE;
 		endcase
 	end
+// END READ_STATE;
+
+// Error checking
+always @(posedge clk or negedge reset_n)
+	if(!reset_n) begin
+		valid_pipe					 <= 0;
+		o_read_error_count		 <= 0;
+		read_return_data[15:0]	 <= 0;
+		read_expected_data[15:0] <= 0;
+		read_data_xor_ff[15:0]	 <= 0;
+		read_error_ff				 <= 0;
+	end else begin
+		valid_pipe[7:0] <= { valid_pipe[6:0], i_valid };
+		o_read_error_count <= o_read_error_count + read_error_ff;
+		case(valid_pipe[3:0])
+			'b0001: begin
+				read_return_data[15:0]   <= i_data[15:0];	// FROM DRAM;
+				read_expected_data[15:0] <= o_data[15:0]; // FROM LFSR+ADDRESS_XOR;
+			end
+			'b0010:read_data_xor_ff[15:0] <= read_data_xor[15:0];
+			'b0100:read_error_ff <= read_error;
+			'b1000:read_error_ff <= 0;
+		endcase
+	end
 //
-
-
-// WRITER STATE MACHINE
+// BEGIN WRITE_STATE;
 reg [7:0] write_state; /* synthesis syn_encoding = "one-hot" */
 always @(posedge clk or negedge reset_n)
 	if(!reset_n) begin
@@ -200,8 +203,10 @@ always @(posedge clk or negedge reset_n)
 					write_address <= write_address + 1;
 					write_state <= RW_WAIT_NOT_BUSY;
 			end
-			DONEROW: write_state <= (state == WRITING) ? write_state : IDLE;
+			DONEROW: write_state <= (writing) ? write_state : IDLE;
 			default: write_state <= IDLE;
 		endcase
 	end
+// END WRITE_STATE;	
+	
 endmodule
