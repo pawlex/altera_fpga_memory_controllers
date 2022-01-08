@@ -25,7 +25,7 @@
 	assign data_pattern = ( lfsr_data[15:0] ^ address_xor[15:0] );
 `endif
 `ifdef ADDR_XOR
-  wire [15:0] address_xor; assign address_xor = (o_addr[15:0] ^ XOR_MASK);
+wire [15:0] address_xor; assign address_xor = (o_addr[15:0] ^ XOR_MASK); // XOR the ADDRESS to make for a more interesting data pattern.  o_addr is really just read_address | write_address
 `endif
 `ifdef LFSR
     wire [15:0] lfsr_data; // data pattern needs to be deterministic for reads and writes.  so a free-running clock isn't appropriate.
