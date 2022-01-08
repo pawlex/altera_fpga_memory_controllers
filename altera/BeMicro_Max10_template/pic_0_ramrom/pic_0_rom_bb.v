@@ -1,10 +1,10 @@
-// megafunction wizard: %ROM: 1-PORT%
+// megafunction wizard: %ROM: 1-PORT%VBB%
 // GENERATION: STANDARD
 // VERSION: WM1.0
 // MODULE: altsyncram 
 
 // ============================================================
-// File Name: rom_pic_0.v
+// File Name: pic_0_rom.v
 // Megafunction Name(s):
 // 			altsyncram
 //
@@ -16,7 +16,6 @@
 //
 // 21.1.0 Build 842 10/21/2021 SJ Lite Edition
 // ************************************************************
-
 
 //Copyright (C) 2021  Intel Corporation. All rights reserved.
 //Your use of Intel Corporation's design tools, logic functions 
@@ -33,18 +32,14 @@
 //refer to the applicable agreement for further details, at
 //https://fpgasoftware.intel.com/eula.
 
-
-// synopsys translate_off
-`timescale 1 ps / 1 ps
-// synopsys translate_on
-module rom_pic_0 (
+module pic_0_rom (
 	address,
 	clock,
 	q);
 
-	input	[8:0]  address;
+	input	[9:0]  address;
 	input	  clock;
-	output	[13:0]  q;
+	output	[15:0]  q;
 `ifndef ALTERA_RESERVED_QIS
 // synopsys translate_off
 `endif
@@ -52,56 +47,6 @@ module rom_pic_0 (
 `ifndef ALTERA_RESERVED_QIS
 // synopsys translate_on
 `endif
-
-	wire [13:0] sub_wire0;
-	wire [13:0] q = sub_wire0[13:0];
-
-	altsyncram	altsyncram_component (
-				.address_a (address),
-				.clock0 (clock),
-				.q_a (sub_wire0),
-				.aclr0 (1'b0),
-				.aclr1 (1'b0),
-				.address_b (1'b1),
-				.addressstall_a (1'b0),
-				.addressstall_b (1'b0),
-				.byteena_a (1'b1),
-				.byteena_b (1'b1),
-				.clock1 (1'b1),
-				.clocken0 (1'b1),
-				.clocken1 (1'b1),
-				.clocken2 (1'b1),
-				.clocken3 (1'b1),
-				.data_a ({14{1'b1}}),
-				.data_b (1'b1),
-				.eccstatus (),
-				.q_b (),
-				.rden_a (1'b1),
-				.rden_b (1'b1),
-				.wren_a (1'b0),
-				.wren_b (1'b0));
-	defparam
-		altsyncram_component.address_aclr_a = "NONE",
-		altsyncram_component.clock_enable_input_a = "BYPASS",
-		altsyncram_component.clock_enable_output_a = "BYPASS",
-`ifdef NO_PLI
-		altsyncram_component.init_file = "/home/pawl/sf_tmp/altera_fpga_memory_controllers/rtl/hdl.verilog.ipcore.pic.risc16f84/main.rif"
-`else
-		altsyncram_component.init_file = "/home/pawl/sf_tmp/altera_fpga_memory_controllers/rtl/hdl.verilog.ipcore.pic.risc16f84/main.hex"
-`endif
-,
-		altsyncram_component.intended_device_family = "MAX 10",
-		altsyncram_component.lpm_hint = "ENABLE_RUNTIME_MOD=YES,INSTANCE_NAME=PIC0",
-		altsyncram_component.lpm_type = "altsyncram",
-		altsyncram_component.numwords_a = 512,
-		altsyncram_component.operation_mode = "ROM",
-		altsyncram_component.outdata_aclr_a = "NONE",
-		altsyncram_component.outdata_reg_a = "CLOCK0",
-		altsyncram_component.ram_block_type = "M9K",
-		altsyncram_component.widthad_a = 9,
-		altsyncram_component.width_a = 14,
-		altsyncram_component.width_byteena_a = 1;
-
 
 endmodule
 
@@ -122,46 +67,46 @@ endmodule
 // Retrieval info: PRIVATE: INIT_FILE_LAYOUT STRING "PORT_A"
 // Retrieval info: PRIVATE: INIT_TO_SIM_X NUMERIC "0"
 // Retrieval info: PRIVATE: INTENDED_DEVICE_FAMILY STRING "MAX 10"
-// Retrieval info: PRIVATE: JTAG_ENABLED NUMERIC "1"
-// Retrieval info: PRIVATE: JTAG_ID STRING "PIC0"
+// Retrieval info: PRIVATE: JTAG_ENABLED NUMERIC "0"
+// Retrieval info: PRIVATE: JTAG_ID STRING "NONE"
 // Retrieval info: PRIVATE: MAXIMUM_DEPTH NUMERIC "0"
-// Retrieval info: PRIVATE: MIFfilename STRING "main.hex"
-// Retrieval info: PRIVATE: NUMWORDS_A NUMERIC "512"
+// Retrieval info: PRIVATE: MIFfilename STRING "/home/pawl/sf_tmp/altera_fpga_memory_controllers/rtl/hdl.verilog.ipcore.pic.risc16f84/main.hex"
+// Retrieval info: PRIVATE: NUMWORDS_A NUMERIC "1024"
 // Retrieval info: PRIVATE: RAM_BLOCK_TYPE NUMERIC "2"
 // Retrieval info: PRIVATE: RegAddr NUMERIC "1"
 // Retrieval info: PRIVATE: RegOutput NUMERIC "1"
 // Retrieval info: PRIVATE: SYNTH_WRAPPER_GEN_POSTFIX STRING "0"
 // Retrieval info: PRIVATE: SingleClock NUMERIC "1"
 // Retrieval info: PRIVATE: UseDQRAM NUMERIC "0"
-// Retrieval info: PRIVATE: WidthAddr NUMERIC "9"
-// Retrieval info: PRIVATE: WidthData NUMERIC "14"
+// Retrieval info: PRIVATE: WidthAddr NUMERIC "10"
+// Retrieval info: PRIVATE: WidthData NUMERIC "16"
 // Retrieval info: PRIVATE: rden NUMERIC "0"
 // Retrieval info: LIBRARY: altera_mf altera_mf.altera_mf_components.all
 // Retrieval info: CONSTANT: ADDRESS_ACLR_A STRING "NONE"
 // Retrieval info: CONSTANT: CLOCK_ENABLE_INPUT_A STRING "BYPASS"
 // Retrieval info: CONSTANT: CLOCK_ENABLE_OUTPUT_A STRING "BYPASS"
-// Retrieval info: CONSTANT: INIT_FILE STRING "main.hex"
+// Retrieval info: CONSTANT: INIT_FILE STRING "/home/pawl/sf_tmp/altera_fpga_memory_controllers/rtl/hdl.verilog.ipcore.pic.risc16f84/main.hex"
 // Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "MAX 10"
-// Retrieval info: CONSTANT: LPM_HINT STRING "ENABLE_RUNTIME_MOD=YES,INSTANCE_NAME=PIC0"
+// Retrieval info: CONSTANT: LPM_HINT STRING "ENABLE_RUNTIME_MOD=NO"
 // Retrieval info: CONSTANT: LPM_TYPE STRING "altsyncram"
-// Retrieval info: CONSTANT: NUMWORDS_A NUMERIC "512"
+// Retrieval info: CONSTANT: NUMWORDS_A NUMERIC "1024"
 // Retrieval info: CONSTANT: OPERATION_MODE STRING "ROM"
 // Retrieval info: CONSTANT: OUTDATA_ACLR_A STRING "NONE"
 // Retrieval info: CONSTANT: OUTDATA_REG_A STRING "CLOCK0"
 // Retrieval info: CONSTANT: RAM_BLOCK_TYPE STRING "M9K"
-// Retrieval info: CONSTANT: WIDTHAD_A NUMERIC "9"
-// Retrieval info: CONSTANT: WIDTH_A NUMERIC "14"
+// Retrieval info: CONSTANT: WIDTHAD_A NUMERIC "10"
+// Retrieval info: CONSTANT: WIDTH_A NUMERIC "16"
 // Retrieval info: CONSTANT: WIDTH_BYTEENA_A NUMERIC "1"
-// Retrieval info: USED_PORT: address 0 0 9 0 INPUT NODEFVAL "address[8..0]"
+// Retrieval info: USED_PORT: address 0 0 10 0 INPUT NODEFVAL "address[9..0]"
 // Retrieval info: USED_PORT: clock 0 0 0 0 INPUT VCC "clock"
-// Retrieval info: USED_PORT: q 0 0 14 0 OUTPUT NODEFVAL "q[13..0]"
-// Retrieval info: CONNECT: @address_a 0 0 9 0 address 0 0 9 0
+// Retrieval info: USED_PORT: q 0 0 16 0 OUTPUT NODEFVAL "q[15..0]"
+// Retrieval info: CONNECT: @address_a 0 0 10 0 address 0 0 10 0
 // Retrieval info: CONNECT: @clock0 0 0 0 0 clock 0 0 0 0
-// Retrieval info: CONNECT: q 0 0 14 0 @q_a 0 0 14 0
-// Retrieval info: GEN_FILE: TYPE_NORMAL rom_pic_0.v TRUE
-// Retrieval info: GEN_FILE: TYPE_NORMAL rom_pic_0.inc FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL rom_pic_0.cmp FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL rom_pic_0.bsf FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL rom_pic_0_inst.v TRUE
-// Retrieval info: GEN_FILE: TYPE_NORMAL rom_pic_0_bb.v TRUE
+// Retrieval info: CONNECT: q 0 0 16 0 @q_a 0 0 16 0
+// Retrieval info: GEN_FILE: TYPE_NORMAL pic_0_rom.v TRUE
+// Retrieval info: GEN_FILE: TYPE_NORMAL pic_0_rom.inc FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL pic_0_rom.cmp FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL pic_0_rom.bsf FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL pic_0_rom_inst.v FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL pic_0_rom_bb.v TRUE
 // Retrieval info: LIB_FILE: altera_mf

@@ -1,5 +1,5 @@
 Archive Project report for BeMicro_MAX10_top
-Fri Jan  7 22:43:12 2022
+Sat Jan  8 05:09:16 2022
 Quartus Prime Version 21.1.0 Build 842 10/21/2021 SJ Lite Edition
 
 
@@ -36,7 +36,7 @@ https://fpgasoftware.intel.com/eula.
 +----------------------------------------------------------------+
 ; Archive Project Summary                                        ;
 +------------------------+---------------------------------------+
-; Archive Project Status ; Successful - Fri Jan  7 22:43:12 2022 ;
+; Archive Project Status ; Successful - Sat Jan  8 05:09:16 2022 ;
 ; Revision Name          ; BeMicro_MAX10_top                     ;
 ; Top-level Entity Name  ; BeMicro_MAX10_top                     ;
 ; Family                 ; MAX 10                                ;
@@ -54,16 +54,16 @@ Info: Archive will store files relative to the closest common parent directory
 Info (13213): Using common directory /
 Info: ----------------------------------------------------------
 Info: ----------------------------------------------------------
-Info: Generated archive '/media/sf_tmp/git_reset.qar'
+Info: Generated archive '/media/sf_tmp/altera_fpga_memory_controllers/release/nios_memory_controller_2022010800.qar'
 Info: ----------------------------------------------------------
 Info: ----------------------------------------------------------
 Info: Generated report 'BeMicro_MAX10_top.archive.rpt'
 Info (23030): Evaluation of Tcl script /opt/intelFPGA_lite/21.1/quartus/common/tcl/apps/qpm/qar.tcl was successful
-Info: Quartus Prime Shell was successful. 0 errors, 37 warnings
-    Info: Peak virtual memory: 596 megabytes
-    Info: Processing ended: Fri Jan  7 22:43:12 2022
-    Info: Elapsed time: 00:00:42
-    Info: Total CPU time (on all processors): 00:00:59
+Info: Quartus Prime Shell was successful. 0 errors, 25 warnings
+    Info: Peak virtual memory: 595 megabytes
+    Info: Processing ended: Sat Jan  8 05:09:16 2022
+    Info: Elapsed time: 00:00:20
+    Info: Total CPU time (on all processors): 00:00:29
 
 
 +----------------------------------------------------------------------------------------------------------+
@@ -75,7 +75,7 @@ Info: Quartus Prime Shell was successful. 0 errors, 37 warnings
 ; ../../rtl/nios_system_sdram_controller/lfsr.v                                                            ;
 ; ../../rtl/nios_system_sdram_controller/nios_system_sdram.v                                               ;
 ; ../../rtl/nios_system_sdram_controller/sdram_init_reader_writer.v                                        ;
-; /home/pawl/sf_tmp/altera_fpga_memory_controllers/rtl/hdl.verilog.ipcore.pic.risc16f84/main.rom           ;
+; /home/pawl/sf_tmp/altera_fpga_memory_controllers/rtl/hdl.verilog.ipcore.pic.risc16f84/main.hex           ;
 ; /media/sf_tmp/altera_fpga_memory_controllers/rtl/hdl.verilog.ipcore.pic.risc16f84/risc16f84_clk2x.v      ;
 ; /media/sf_tmp/altera_fpga_memory_controllers/rtl/nios_system_sdram_controller/lfsr.v                     ;
 ; /media/sf_tmp/altera_fpga_memory_controllers/rtl/nios_system_sdram_controller/nios_system_sdram.v        ;
@@ -103,16 +103,13 @@ Info: Quartus Prime Shell was successful. 0 errors, 37 warnings
 ; pic_0_ramrom/pic_0_ram.v                                                                                 ;
 ; pic_0_ramrom/pic_0_ram_bb.v                                                                              ;
 ; pic_0_ramrom/pic_0_ram_inst.v                                                                            ;
-; pic_0_ramrom/rom_pic_0.qip                                                                               ;
-; pic_0_ramrom/rom_pic_0.v                                                                                 ;
-; pic_0_ramrom/rom_pic_0_bb.v                                                                              ;
-; pic_0_ramrom/rom_pic_0_inst.v                                                                            ;
+; pic_0_ramrom/pic_0_rom.qip                                                                               ;
+; pic_0_ramrom/pic_0_rom.v                                                                                 ;
+; pic_0_ramrom/pic_0_rom_bb.v                                                                              ;
 ; pll/pll_0.ppf                                                                                            ;
 ; pll/pll_0.qip                                                                                            ;
 ; pll/pll_0.v                                                                                              ;
-; pll/pll_0_bb.qip                                                                                         ;
 ; pll/pll_0_bb.v                                                                                           ;
-; pll/pll_0_inst.v                                                                                         ;
 ; pll/pll_1.ppf                                                                                            ;
 ; pll/pll_1.qip                                                                                            ;
 ; pll/pll_1.v                                                                                              ;

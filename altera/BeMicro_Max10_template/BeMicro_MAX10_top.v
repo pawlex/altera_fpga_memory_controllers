@@ -313,11 +313,14 @@ module BeMicro_MAX10_top (
 `endif
 
 `ifdef ENABLE_PLL_0
-wire clk120p0, clk109p0, pll_0_lock;
+wire clk120p0, clk16p0, clk8p0, clk4p0, clk2p0, pll_0_lock;
 pll_0	pll_0_inst (
 	.inclk0 ( SYS_CLK ),
 	.c0 ( clk120p0 ),
-	.c1 ( clk109p0 ),
+	.c1 ( clk16p0 ),
+	.c2 ( clk8p0 ),
+	.c3 ( clk4p0 ),
+	.c4 ( clk2p0 ),
 	.locked ( pll_0_lock )
 	);
 `endif
@@ -336,7 +339,7 @@ pll_1	pll_1_inst (
 `endif
 
 /* LED SWAPPING and assigns */
-assign USER_LED[8:1] = ~pic_0_io_data;
+assign USER_LED[8:1] = ~pic_o_io_wr_data[7:0];
 //reg [7:0] led_o; assign USER_LED[8:1] = ~led_o;
 //always @* begin
 //	led_o[7]= reset_n; // Assert LED while device is in RESET
@@ -400,9 +403,22 @@ nios_system_sdram sdram_0 (
 `endif
 
 `ifdef PIC14_16F
+wire PIC_CLK, PIC_2X_CLK;
+assign PIC_CLK = clk2p0;
+assign PIC_2X_CLK = ~clk4p0; // RAM/ROM should be latched on the falling edge. S&H
+/* 8/~16 on same PLL works */
+/* 25/~50(sys) works */
+/* 50(sys)/100 works */
 
-wire [13:0] pic_0_rom_data;
-wire [12:0] pic_0_rom_address; // 1M9K, so really only [8:0];
+
+assign DEBUG[15:12] = { PIC_CLK, pic_0_ram_we, pic_0_io_rd, pic_0_io_wr};
+//assign DEBUG[5:0]   = pic_0_io_data[5:0];
+//assign DEBUG[11:6]  = pic_o_io_wr_data[5:0];
+assign DEBUG[11:08] = pic_0_ram_read_data[3:0];
+assign DEBUG[07:04] = pic_0_rom_data_byte_swapped[3:0];
+assign DEBUG[03:00] = pic_0_rom_address[3:0];
+wire [15:0] pic_0_rom_data;
+wire [12:0] pic_0_rom_address; // 2M9K, so really only [9:0];
 wire [07:0] pic_0_ram_write_data;
 wire [07:0] pic_0_ram_read_data;
 wire [09:0] pic_0_ram_address; // 1M9K, PIC can only address 9 bits.
@@ -410,21 +426,39 @@ wire [15:0] pic_0_io_address;
 wire [07:0] pic_0_io_data;
 wire pic_0_ram_we, pic_0_io_rd, pic_0_io_wr;
 
-rom_pic_0
-	rom_pic_0_inst 
+/* 
+	SDCC and gutils produces 16 byte intel-hex format,
+	which is byte-swapped and byte aligned.
+*/
+
+wire [15:0] pic_0_rom_data_byte_swapped;
+assign pic_0_rom_data_byte_swapped = { pic_0_rom_data[7:0], pic_0_rom_data[15:8] };
+
+// Latch the IO write data
+// DFF on PIC_CLK because PIC design uses tri-state
+// on IO data.  Quartus doesn't like this.
+// Converted the fan-out from the tri-state buffer "<name>" 
+// to the node "<name>" into an OR gate (ID: 13047)
+reg [7:0] pic_o_io_wr_data;
+always @(negedge PIC_CLK or negedge reset_n) 
+	if(!reset_n) pic_o_io_wr_data <= 0;
+	else if(pic_0_io_wr) pic_o_io_wr_data <= pic_0_io_data;
+//
+pic_0_rom // Stored in 32-byte intel-hex format.
+	pic_0_rom_inst 
 	(
 		.address ( pic_0_rom_address ),
-		.clock ( clk1p0 ),
+		.clock ( PIC_2X_CLK ),
 		.q ( pic_0_rom_data )
 	);
 	
 pic_0_ram	
 	pic_0_ram_inst 
 	(
-		.address ( pic_0_ram_address[8:0] ),
+		.address ( pic_0_ram_address ),
 		.data ( pic_0_ram_write_data ),
-		.inclock ( clk1p0 ),
-		.outclock ( clk1p0 ),
+		.inclock ( PIC_2X_CLK ),
+		.outclock ( PIC_2X_CLK ),
 		.wren ( pic_0_ram_we ),
 		.q ( pic_0_ram_read_data )
 	);
@@ -432,20 +466,21 @@ pic_0_ram
 risc16f84_clk2x 
 	pic_0
 	(
-		.prog_dat_i(pic_0_rom_data),           // [13:0] ROM read data
+		.prog_dat_i(pic_0_rom_data_byte_swapped), // [13:0] ROM read data
 		.prog_adr_o(pic_0_rom_address),           // [12:0] ROM address
 		.ram_dat_i(pic_0_ram_read_data),            // [7:0] RAM read data
 		.ram_dat_o(pic_0_ram_write_data),            // [7:0] RAM write data
-		.ram_adr_o(pic_0_ram_address[8:0]),            // [8:0] RAM address; ram_adr[8:7] indicates RAM-BANK
+		.ram_adr_o(pic_0_ram_address),            // [8:0] RAM address; ram_adr[8:7] indicates RAM-BANK
 		.ram_we_o(pic_0_ram_we),             // RAM write strobe (H active)
-		.aux_adr_o(pic_0_io_addr),            // [15:0] Auxiliary address bus
+		.aux_adr_o(pic_0_io_address),            // [15:0] Auxiliary address bus
 		.aux_dat_io(pic_0_io_data),           // [7:0] Auxiliary data bus (tri-state bidirectional)
 		.aux_we_o(pic_0_io_wr),             // Auxiliary write strobe (H active)
 		.aux_re_o(pic_0_io_rd),             // Auxiliary read  strobe (H active) PK
 		.int0_i(1'b0),               // PORT-B(0) INT
 		.reset_i(reset),              // Power-on reset (H active)
-		.clk_en_i(pll_1_lock),             // Clock enable for all clocked logic
-		.clk_i(clk1p0)                 // Clock input
+		// TODO: Move both PIC and 2X to same PLL.
+		.clk_en_i(1'b1),             // Clock enable for all clocked logic
+		.clk_i(PIC_CLK)                 // Clock input
 	);
 //
 `endif 

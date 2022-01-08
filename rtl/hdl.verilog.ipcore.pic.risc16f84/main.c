@@ -26,7 +26,7 @@ void halt(void)
 
 void nopsleep(void)
 {
-	for(uint32_t i=1000000; i>0; i--)
+	for(uint16_t i=10000; i>0; i--)
 	{
 		__asm nop __endasm;
 	}
@@ -42,9 +42,9 @@ void io_counter(void)
         PORTA = i & 0xff; 
         PORTB = ((i >> 8) & 0xff);
         EEDATA = i & 0xff;
+    	nopsleep();
     }
 
-    nopsleep();
     
     // READ BACK AND COMPARE
     //for(i=0;i<MAXVAL;i=i+STRIDE)

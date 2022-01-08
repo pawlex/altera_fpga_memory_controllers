@@ -1,0 +1,51 @@
+Quartus Prime Archive log --	/media/sf_tmp/altera_fpga_memory_controllers/release/nios_memory_controller_2022010800.qarlog
+
+Archive:	/media/sf_tmp/altera_fpga_memory_controllers/release/nios_memory_controller_2022010800.qar
+Date:		Sat Jan  8 05:09:16 2022
+Quartus Prime		21.1.0 Build 842 10/21/2021 SJ Lite Edition
+
+	=========== Files Selected: ===========
+/home/pawl/sf_tmp/altera_fpga_memory_controllers/rtl/hdl.verilog.ipcore.pic.risc16f84/main.hex
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/BeMicro_MAX10_top.qpf
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/BeMicro_MAX10_top.qsf
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/BeMicro_MAX10_top.sdc
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/BeMicro_MAX10_top.v
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/onchip_flash/oc_flash.qsys
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/onchip_flash/oc_flash.sopcinfo
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/onchip_flash/oc_flash/oc_flash.cmp
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/onchip_flash/oc_flash/synthesis/oc_flash.debuginfo
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/onchip_flash/oc_flash/synthesis/oc_flash.qip
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/onchip_flash/oc_flash/synthesis/oc_flash.v
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/onchip_flash/oc_flash/synthesis/submodules/altera_onchip_flash.sdc
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/onchip_flash/oc_flash/synthesis/submodules/altera_onchip_flash.v
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/onchip_flash/oc_flash/synthesis/submodules/altera_onchip_flash_avmm_csr_controller.v
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/onchip_flash/oc_flash/synthesis/submodules/altera_onchip_flash_avmm_data_controller.v
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/onchip_flash/oc_flash/synthesis/submodules/altera_onchip_flash_util.v
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/onchip_flash/oc_flash/synthesis/submodules/rtl/altera_onchip_flash_block.v
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/pic_0_ramrom/pic_0_ram.qip
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/pic_0_ramrom/pic_0_ram.v
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/pic_0_ramrom/pic_0_ram_bb.v
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/pic_0_ramrom/pic_0_ram_inst.v
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/pic_0_ramrom/pic_0_rom.qip
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/pic_0_ramrom/pic_0_rom.v
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/pic_0_ramrom/pic_0_rom_bb.v
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/pll/pll_0.ppf
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/pll/pll_0.qip
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/pll/pll_0.v
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/pll/pll_0_bb.v
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/pll/pll_1.ppf
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/pll/pll_1.qip
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/pll/pll_1.v
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/pll/pll_1_bb.v
+/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/pll/pll_1_inst.v
+/media/sf_tmp/altera_fpga_memory_controllers/rtl/hdl.verilog.ipcore.pic.risc16f84/risc16f84_clk2x.v
+/media/sf_tmp/altera_fpga_memory_controllers/rtl/nios_system_sdram_controller/lfsr.v
+/media/sf_tmp/altera_fpga_memory_controllers/rtl/nios_system_sdram_controller/nios_system_sdram.v
+/media/sf_tmp/altera_fpga_memory_controllers/rtl/nios_system_sdram_controller/nios_system_sdram_ifdefs.v
+/media/sf_tmp/altera_fpga_memory_controllers/rtl/nios_system_sdram_controller/nios_system_sdram_params.v
+/media/sf_tmp/altera_fpga_memory_controllers/rtl/nios_system_sdram_controller/sdram_init_reader_writer.v
+/opt/intelFPGA_lite/21.1/quartus/linux64/assignment_defaults.qdf
+	======= Total: 40 files to archive =======
+
+	================ Status: ===============
+All files archived successfully.

@@ -80,7 +80,7 @@ reg  exec_stall_reg;         // if H (i.e. after GOTO etc), stall execution.
 
      // Stack
                              // stack (array of data-registers)
-reg  [12:0] stack_reg [STACK_SIZE_PP-1:0];
+reg  [12:0] stack_reg [STACK_SIZE_PP];
                              // stack pointer
 reg  [LOG2_STACK_SIZE_PP-1:0] stack_pnt_reg;
 wire [12:0] stack_top;       // More compatible with sensitivity list than
