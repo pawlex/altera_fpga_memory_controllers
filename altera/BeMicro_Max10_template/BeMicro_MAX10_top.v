@@ -14,7 +14,7 @@
 //`define ENABLE_DAC_SPI_INTERFACE
 //`define ENABLE_TEMP_SENSOR
 //`define ENABLE_ACCELEROMETER
-`define ENABLE_SDRAM
+//`define ENABLE_SDRAM
 //`define ENABLE_SPI_FLASH
 //`define ENABLE_MAX10_ANALOG
 `define ENABLE_PUSHBUTTON
@@ -28,6 +28,8 @@
 `define DESIGN_LEVEL_RESET
 `define ENABLE_PLL_0
 `define ENABLE_PLL_1
+//`define ENABLE_UFM
+`define PIC14_16F
 
 module BeMicro_MAX10_top (
 
@@ -311,15 +313,11 @@ module BeMicro_MAX10_top (
 `endif
 
 `ifdef ENABLE_PLL_0
-//wire clk8p0, clk16p6, clk33p3, clk66p6, clk133p0, pll_0_lock;
 wire clk120p0, clk109p0, pll_0_lock;
 pll_0	pll_0_inst (
 	.inclk0 ( SYS_CLK ),
 	.c0 ( clk120p0 ),
 	.c1 ( clk109p0 ),
-	//.c2 ( clk33p3 ),
-	//.c3 ( clk16p6 ),
-	//.c4 ( clk8p0 ),
 	.locked ( pll_0_lock )
 	);
 `endif
@@ -338,17 +336,18 @@ pll_1	pll_1_inst (
 `endif
 
 /* LED SWAPPING and assigns */
-reg [7:0] led_o; assign USER_LED[8:1] = ~led_o;
-always @* begin
-	led_o[7]= reset_n; // Assert LED while device is in RESET
-	led_o[6]= o_ram_error;
-	led_o[5]= o_ram_reading;
-	led_o[4]= o_ram_writing;
-	led_o[3]= o_read_error_count[3];
-	led_o[2]= o_read_error_count[2];
-	led_o[1]= o_read_error_count[1];
-	led_o[0]= o_read_error_count[0];
-end
+assign USER_LED[8:1] = ~pic_0_io_data;
+//reg [7:0] led_o; assign USER_LED[8:1] = ~led_o;
+//always @* begin
+//	led_o[7]= reset_n; // Assert LED while device is in RESET
+//	led_o[6]= o_ram_error;
+//	led_o[5]= o_ram_reading;
+//	led_o[4]= o_ram_writing;
+//	led_o[3]= o_read_error_count[3];
+//	led_o[2]= o_read_error_count[2];
+//	led_o[1]= o_read_error_count[1];
+//	led_o[0]= o_read_error_count[0];
+//end
 
 `ifdef ENABLE_SDRAM
 assign SDRAM_CLK = clk120p0;
@@ -398,6 +397,99 @@ nios_system_sdram sdram_0 (
 	.zs_ras_n(SDRAM_RASn),
 	.zs_we_n(SDRAM_WEn)
 	);
+`endif
+
+`ifdef PIC14_16F
+
+wire [13:0] pic_0_rom_data;
+wire [12:0] pic_0_rom_address; // 1M9K, so really only [8:0];
+wire [07:0] pic_0_ram_write_data;
+wire [07:0] pic_0_ram_read_data;
+wire [09:0] pic_0_ram_address; // 1M9K, PIC can only address 9 bits.
+wire [15:0] pic_0_io_address;
+wire [07:0] pic_0_io_data;
+wire pic_0_ram_we, pic_0_io_rd, pic_0_io_wr;
+
+rom_pic_0
+	rom_pic_0_inst 
+	(
+		.address ( pic_0_rom_address ),
+		.clock ( clk1p0 ),
+		.q ( pic_0_rom_data )
+	);
+	
+pic_0_ram	
+	pic_0_ram_inst 
+	(
+		.address ( pic_0_ram_address[8:0] ),
+		.data ( pic_0_ram_write_data ),
+		.inclock ( clk1p0 ),
+		.outclock ( clk1p0 ),
+		.wren ( pic_0_ram_we ),
+		.q ( pic_0_ram_read_data )
+	);
+
+risc16f84_clk2x 
+	pic_0
+	(
+		.prog_dat_i(pic_0_rom_data),           // [13:0] ROM read data
+		.prog_adr_o(pic_0_rom_address),           // [12:0] ROM address
+		.ram_dat_i(pic_0_ram_read_data),            // [7:0] RAM read data
+		.ram_dat_o(pic_0_ram_write_data),            // [7:0] RAM write data
+		.ram_adr_o(pic_0_ram_address[8:0]),            // [8:0] RAM address; ram_adr[8:7] indicates RAM-BANK
+		.ram_we_o(pic_0_ram_we),             // RAM write strobe (H active)
+		.aux_adr_o(pic_0_io_addr),            // [15:0] Auxiliary address bus
+		.aux_dat_io(pic_0_io_data),           // [7:0] Auxiliary data bus (tri-state bidirectional)
+		.aux_we_o(pic_0_io_wr),             // Auxiliary write strobe (H active)
+		.aux_re_o(pic_0_io_rd),             // Auxiliary read  strobe (H active) PK
+		.int0_i(1'b0),               // PORT-B(0) INT
+		.reset_i(reset),              // Power-on reset (H active)
+		.clk_en_i(pll_1_lock),             // Clock enable for all clocked logic
+		.clk_i(clk1p0)                 // Clock input
+	);
+//
+`endif 
+
+
+`ifdef ENABLE_UFM
+// ("oc_flash_onchip_flash_0.hex") //
+
+ oc_flash ufm0 (
+        .clock                   (clk100p0),
+        .reset_n                 (reset_n),
+        .avmm_data_addr          (), //16
+        .avmm_data_read          (),
+        .avmm_data_writedata     (), //32
+        .avmm_data_write         (), 
+        .avmm_data_readdata      (), //32,o
+        .avmm_data_waitrequest   (), //o
+        .avmm_data_readdatavalid (), //o
+        .avmm_data_burstcount    (), //2
+        .avmm_csr_addr           (),
+        .avmm_csr_read           (),
+        .avmm_csr_writedata      (), //32
+        .avmm_csr_write          (),
+        .avmm_csr_readdata       ()  //32,o
+    );
+/*
+module oc_flash (
+		input  wire        clock,                   //    clk.clk
+		input  wire        avmm_csr_addr,           //    csr.address
+		input  wire        avmm_csr_read,           //       .read
+		input  wire [31:0] avmm_csr_writedata,      //       .writedata
+		input  wire        avmm_csr_write,          //       .write
+		output wire [31:0] avmm_csr_readdata,       //       .readdata
+		input  wire [15:0] avmm_data_addr,          //   data.address
+		input  wire        avmm_data_read,          //       .read
+		input  wire [31:0] avmm_data_writedata,     //       .writedata
+		input  wire        avmm_data_write,         //       .write
+		output wire [31:0] avmm_data_readdata,      //       .readdata
+		output wire        avmm_data_waitrequest,   //       .waitrequest
+		output wire        avmm_data_readdatavalid, //       .readdatavalid
+		input  wire [1:0]  avmm_data_burstcount,    //       .burstcount
+		input  wire        reset_n                  // nreset.reset_n
+	);
+*/
 `endif
 
 endmodule

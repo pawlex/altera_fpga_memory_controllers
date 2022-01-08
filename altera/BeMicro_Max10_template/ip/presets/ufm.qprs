@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ip>
+ <presets version="12.1">
+  <preset name="ufm" kind="altera_onchip_flash" version="All" description="">
+   <parameter name="initializationFileName" value="altera_onchip_flash.hex" />
+   <parameter
+       name="SECTOR_ACCESS_MODE"
+       value="Read and write,Read and write,Read and write,Read and write,Hidden" />
+   <parameter name="initializationFileNameForSim" value="altera_onchip_flash.dat" />
+   <parameter name="CLOCK_FREQUENCY" value="100.0" />
+   <parameter name="initFlashContent" value="true" />
+   <parameter name="CONFIGURATION_SCHEME" value="Internal Configuration" />
+   <parameter name="useNonDefaultInitFile" value="false" />
+   <parameter name="DATA_INTERFACE" value="Parallel" />
+   <parameter name="CONFIGURATION_MODE" value="Single Compressed Image" />
+   <parameter name="READ_BURST_MODE" value="Incrementing" />
+   <parameter name="READ_BURST_COUNT" value="2" />
+  </preset>
+ </presets>
+</ip>

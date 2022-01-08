@@ -1,0 +1,29 @@
+Info: Starting: Create block symbol file (.bsf)
+Info: qsys-generate /media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/onchip_flash/oc_flash.qsys --block-symbol-file --output-directory=/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/onchip_flash/oc_flash --family="MAX 10" --part=10M08DAF484C8GES
+Progress: Loading onchip_flash/oc_flash.qsys
+Progress: Reading input file
+Progress: Adding onchip_flash_0 [altera_onchip_flash 21.1]
+Progress: Parameterizing module onchip_flash_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: qsys-generate succeeded.
+Info: Finished: Create block symbol file (.bsf)
+Info: 
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate /media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/onchip_flash/oc_flash.qsys --synthesis=VERILOG --output-directory=/media/sf_tmp/altera_fpga_memory_controllers/altera/BeMicro_Max10_template/onchip_flash/oc_flash/synthesis --family="MAX 10" --part=10M08DAF484C8GES
+Progress: Loading onchip_flash/oc_flash.qsys
+Progress: Reading input file
+Progress: Adding onchip_flash_0 [altera_onchip_flash 21.1]
+Progress: Parameterizing module onchip_flash_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: oc_flash: Generating oc_flash "oc_flash" for QUARTUS_SYNTH
+Info: onchip_flash_0: Generating top-level entity altera_onchip_flash
+Info: onchip_flash_0: "oc_flash" instantiated altera_onchip_flash "onchip_flash_0"
+Info: oc_flash: Done "oc_flash" with 2 modules, 7 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis
