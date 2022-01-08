@@ -1,5 +1,7 @@
 #include <pic16regs.h>
 #include <stdint.h>
+#include <stdio.h>
+//#include <unistd.h>
 
 /* Paul Komurka
  * test file for the soft-core pic16f84 (clk2x)
@@ -22,18 +24,27 @@ void halt(void)
 #define STRIDE 0x1
 #define MAXVAL 0xFF
 
-uint16_t i=0;
+void nopsleep(void)
+{
+	for(uint32_t i=1000000; i>0; i--)
+	{
+		__asm nop __endasm;
+	}
+}
+
 void io_counter(void)
 
 {
     // LOAD GPIO RAM (RAM BACKED PORT)
     // WITH DATA = ADDRESS
-    for(i=0;i<MAXVAL;i=i+STRIDE)
+    for(uint16_t i=0;i<MAXVAL;i=i+STRIDE)
     {
         PORTA = i & 0xff; 
         PORTB = ((i >> 8) & 0xff);
         EEDATA = i & 0xff;
     }
+
+    nopsleep();
     
     // READ BACK AND COMPARE
     //for(i=0;i<MAXVAL;i=i+STRIDE)
