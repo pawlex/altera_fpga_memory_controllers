@@ -63,6 +63,7 @@ wire [15:0] data_pattern;
 
 /*
 	PICK YOUR DATA PATTERN
+	( logic define in: nios_system_sdram_ifdefs.v )
 */
 //`define DATA_EQ_ADDRESS
 //`define DATA_EQ_LFSR
