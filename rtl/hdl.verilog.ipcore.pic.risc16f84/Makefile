@@ -2,7 +2,10 @@ SRC=main.c
 CC=/usr/local/bin/sdcc
 FAMILY=pic14
 PROC=16f84
-OPTS=--use-non-free --no-extended-instructions
+OPTS=--use-non-free --no-extended-instructions --no-warn-non-free --stack-size 8
+OPTS+=--out-fmt-ihx
+#OPTS+=--out-fmt-s19
+
 all: $(SRC:.c=.hex) rom
 
 $(SRC:.c=.hex): $(SRC)
