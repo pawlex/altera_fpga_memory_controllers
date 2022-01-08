@@ -28,11 +28,11 @@
   wire [15:0] address_xor; assign address_xor = (o_addr[15:0] ^ XOR_MASK);
 `endif
 `ifdef LFSR
-	wire [15:0] lfsr_data;
-	wire lfsr_clk; assign lfsr_clk = read_address[0] ^ write_address[0];
-	wire lfsr_reset; assign lfsr_reset = (start_reading | start_writing);
-	reg lfsr_reset_ff; always @(posedge clk) lfsr_reset_ff <= lfsr_reset;
-	wire lfsr_reset_n; assign lfsr_reset_n = ~(lfsr_reset|lfsr_reset_ff);
+    wire [15:0] lfsr_data; // data pattern needs to be deterministic for reads and writes.  so a free-running clock isn't appropriate.
+    wire lfsr_clk; assign lfsr_clk = read_address[0] ^ write_address[0]; // clock the LFSR whenever the read or write address changes
+    wire lfsr_reset; assign lfsr_reset = (start_reading | start_writing); // reset the LFSR whenever we start a read or write loop
+    reg lfsr_reset_ff; always @(posedge clk) lfsr_reset_ff <= lfsr_reset; // give the LFSR 2x clock pulse.  probably unnecessary
+    wire lfsr_reset_n; assign lfsr_reset_n = ~(lfsr_reset|lfsr_reset_ff); // ^^
 	lfsr lfsr_0
 	(
 		.clk(lfsr_clk),
