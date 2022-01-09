@@ -1,17 +1,9 @@
-# BASIC Verilog and System Verilog Simulation Environment
-## Using icarus verilog and gtkwave
+## Shadow rom copy
+Copy the user flash memory from the altera FPGA into M9K dual-port RAM to use as ROM for our microcontroller.
+* Why not just use the UFM directly?
+1. You can flash UFM independently of the configuration memory (flash), which is how the internal M9K ROM gets programmed.
+- In a nutshell, you don't need to fully re-synthesize your design just to change the microcontroller ROM.
+2. The UFM is huge in comparison to the size of ROM we need.  If we're using UFM for CPU only this isn't a problem but I suspect we'll want to use it for other things.
 
-### Components
-tb.v : test bench stimuli
-
-top.v: top level module
-
-compile: compiles and runs simulation and launches gtk-wave with the output .vcd
-### Requirements
-Linux env
-
-Icarus verilog compiler [apt-get install iverilog]
-
-GTKWAVE [apt-get install gtkwave]
-
-![gtkwave](gtkwave.png)
+### Avalon_MM burst read transaction.
+![avalon_waveform](avalon_mm_burst_read.png)
