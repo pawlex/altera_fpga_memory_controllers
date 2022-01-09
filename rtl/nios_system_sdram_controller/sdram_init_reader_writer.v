@@ -21,8 +21,8 @@ module sdram_init_reader_writer
 	output o_rd_n,
 	output o_wr_n,
 	output o_error,
-	o_ram_reading,
-	o_ram_writing,
+	output o_ram_reading,
+	output o_ram_writing,
 	output [15:0] o_data,
 	output [21:0] o_addr,
 	output [1:0] o_be_n,
@@ -63,6 +63,7 @@ wire [15:0] data_pattern;
 
 /*
 	PICK YOUR DATA PATTERN
+	( logic define in: nios_system_sdram_ifdefs.v )
 */
 //`define DATA_EQ_ADDRESS
 //`define DATA_EQ_LFSR
