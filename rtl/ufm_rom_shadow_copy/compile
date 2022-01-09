@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 SIMFILES=( "./tb.v" "./top.v" )
-#SIMFILES+=( "./nios_system_sdram.v" )
+SIMFILES+=( "./ufm_rom_shadow_copy.v" )
 
-IVERILOG='iverilog'
+IVERILOG='iverilog -g2005-sv'
 SIMFLAGS='-DSIMULATION'
 SIMOUTFL='out.vvp'
 WAVEFILE='dump.vcd'
