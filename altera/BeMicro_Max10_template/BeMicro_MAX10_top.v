@@ -28,7 +28,10 @@
 `define DESIGN_LEVEL_RESET
 `define ENABLE_PLL_0
 `define ENABLE_PLL_1
-//`define ENABLE_UFM
+`define ENABLE_UFM
+//`define ENABLE_PIC_M9K_ROM
+`define ENABLE_PIC_M9K_RAM_AS_ROM
+`define ENABLE_PIC_M9K_RAM
 `define PIC14_16F
 
 module BeMicro_MAX10_top (
@@ -444,24 +447,6 @@ always @(negedge PIC_CLK or negedge reset_n)
 	if(!reset_n) pic_o_io_wr_data <= 0;
 	else if(pic_0_io_wr) pic_o_io_wr_data <= pic_0_io_data;
 //
-pic_0_rom // Stored in 32-byte intel-hex format.
-	pic_0_rom_inst 
-	(
-		.address ( pic_0_rom_address ),
-		.clock ( PIC_2X_CLK ),
-		.q ( pic_0_rom_data )
-	);
-	
-pic_0_ram	
-	pic_0_ram_inst 
-	(
-		.address ( pic_0_ram_address ),
-		.data ( pic_0_ram_write_data ),
-		.inclock ( PIC_2X_CLK ),
-		.outclock ( PIC_2X_CLK ),
-		.wren ( pic_0_ram_we ),
-		.q ( pic_0_ram_read_data )
-	);
 
 risc16f84_clk2x 
 	pic_0
@@ -483,48 +468,68 @@ risc16f84_clk2x
 		.clk_i(PIC_CLK)                 // Clock input
 	);
 //
-`endif 
+`endif
 
+`ifdef ENABLE_PIC_M9K_RAM_AS_ROM
+// Create a dual-ported RAM to act as a ROM for our PIC.
+// 1024 16'bit words. on the output and 512 32'bit words on the input.
+// Shadow this in from the UFM.  This seemed like the easiest way.
+wire [31:0] pic_0_rom_wr_data;
+wire [08:0] pic_0_rom_wr_addr;
+wire [03:0] pic_0_rom_wr_be;
+wire [00:0] pic_0_rom_wr_we;
+pic_0_ram_as_rom // Stored in 16-byte intel-hex format.
+	pic_0_rom_inst 
+	(		
+		.byteena_a ( pic_0_rom_wr_be ),
+		.data ( pic_0_rom_wr_data ),
+		.rdaddress ( pic_0_rom_address ),
+		.rdclock ( PIC_2X_CLK ),
+		.wraddress ( pic_0_rom_wr_addr ),
+		.wrclock ( clk100p0 ),
+		.wren ( pic_0_rom_wr_we ),
+		.q ( pic_0_rom_data )
+	);
+`endif
+
+`ifdef ENABLE_PIC_M9K_ROM
+pic_0_rom // Stored in 32-byte intel-hex format.
+	pic_0_rom_inst 
+	(
+		.address ( pic_0_rom_address ),
+		.clock ( PIC_2X_CLK ),
+		.q ( pic_0_rom_data )
+	);
+`endif
+
+`ifdef ENABLE_PIC_M9K_RAM
+pic_0_ram	
+	pic_0_ram_inst 
+	(
+		.address ( pic_0_ram_address ),
+		.data ( pic_0_ram_write_data ),
+		.inclock ( PIC_2X_CLK ),
+		.outclock ( PIC_2X_CLK ),
+		.wren ( pic_0_ram_we ),
+		.q ( pic_0_ram_read_data )
+	);
+`endif
 
 `ifdef ENABLE_UFM
-// ("oc_flash_onchip_flash_0.hex") //
-
- oc_flash ufm0 (
-        .clock                   (clk100p0),
-        .reset_n                 (reset_n),
-        .avmm_data_addr          (), //16
-        .avmm_data_read          (),
-        .avmm_data_writedata     (), //32
-        .avmm_data_write         (), 
-        .avmm_data_readdata      (), //32,o
-        .avmm_data_waitrequest   (), //o
-        .avmm_data_readdatavalid (), //o
-        .avmm_data_burstcount    (), //2
-        .avmm_csr_addr           (),
-        .avmm_csr_read           (),
-        .avmm_csr_writedata      (), //32
-        .avmm_csr_write          (),
-        .avmm_csr_readdata       ()  //32,o
-    );
-/*
-module oc_flash (
-		input  wire        clock,                   //    clk.clk
-		input  wire        avmm_csr_addr,           //    csr.address
-		input  wire        avmm_csr_read,           //       .read
-		input  wire [31:0] avmm_csr_writedata,      //       .writedata
-		input  wire        avmm_csr_write,          //       .write
-		output wire [31:0] avmm_csr_readdata,       //       .readdata
-		input  wire [15:0] avmm_data_addr,          //   data.address
-		input  wire        avmm_data_read,          //       .read
-		input  wire [31:0] avmm_data_writedata,     //       .writedata
-		input  wire        avmm_data_write,         //       .write
-		output wire [31:0] avmm_data_readdata,      //       .readdata
-		output wire        avmm_data_waitrequest,   //       .waitrequest
-		output wire        avmm_data_readdatavalid, //       .readdatavalid
-		input  wire [1:0]  avmm_data_burstcount,    //       .burstcount
-		input  wire        reset_n                  // nreset.reset_n
-	);
-*/
+wire [31:0] ufm_rd_data;
+wire [15:0] ufm_rd_addr;
+wire [01:0] ufm_burst_count;
+wire ufm_rd, ufm_rd_waitreq, ufm_rd_valid;
+oc_flash ufm_inst (
+	.clock(clk100p0),
+	.reset_n(reset_n),
+	.avmm_data_addr(ufm_rd_addr),
+	.avmm_data_read(ufm_rd),
+	.avmm_data_readdata(ufm_rd_data),
+	.avmm_data_waitrequest(ufm_rd_waitreq),
+	.avmm_data_readdatavalid(ufm_rd_valid),
+	.avmm_data_burstcount(ufm_burst_count)
+);
 `endif
 
 endmodule
