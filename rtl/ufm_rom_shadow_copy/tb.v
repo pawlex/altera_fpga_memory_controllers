@@ -10,7 +10,9 @@ end
 
 initial begin
     reset_n = 0;
-    #10;
+    ufm_wait_req_i = 0;
+    ufm_valid_i = 0;
+    #30;
     reset_n = 1;
     #600 $finish;
 end
@@ -20,10 +22,24 @@ initial begin
     $dumpvars();
 end
 
+// Emulate the Avalon_mm behavior.
 initial begin
-    forever wait(ufm_read_o) begin ufm_wait_req_i = #3 1; #60 ufm_wait_req_i = 0; #100; end
+    forever wait(ufm_read_o) begin
+        ufm_wait_req_i = #3 1;
+        #60 ufm_wait_req_i = 0;
+        repeat(5) @(posedge clk);
+        ufm_valid_i =1;
+        repeat(1) @(posedge clk);
+        ufm_valid_i = 0;
+    end
+
 end
 
+always @(posedge clk or negedge reset_n)
+    if(!reset_n) ufm_data_i <= 31'h55555555;
+    else if(ufm_valid_i) begin
+        ufm_data_i <= ~ufm_data_i;
+    end
 
 /* SOME EXAMPLES */
 //initial begin

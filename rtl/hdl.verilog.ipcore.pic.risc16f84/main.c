@@ -24,49 +24,96 @@ void halt(void)
 #define STRIDE 0x1
 #define MAXVAL 0xFF
 
-void nopsleep(void)
+void nopsleep(uint16_t target)
 {
-	for(uint16_t i=10000; i>0; i--)
+	for(uint16_t i=target; i>0; i--)
 	{
 		__asm nop __endasm;
 	}
 }
 
-void io_counter(void)
+void io_data_write(uint8_t val, uint16_t sleep)
+{
+    EEDATA = val;
+    if(sleep)
+    {
+        nopsleep(sleep);
+    }
+}
+
+void led_test(void)
 
 {
-    // LOAD GPIO RAM (RAM BACKED PORT)
-    // WITH DATA = ADDRESS
-    for(uint16_t i=0;i<MAXVAL;i=i+STRIDE)
-    {
-        PORTA = i & 0xff; 
-        PORTB = ((i >> 8) & 0xff);
-        EEDATA = i & 0xff;
-    	nopsleep();
-    }
+    //io_data_write(0xff, 0xF000);
+    //io_data_write(0x00, 0xF000);
+    io_data_write(0x55, 0xF000);
+    io_data_write(0xAA, 0xF000);
+}
 
-    
-    // READ BACK AND COMPARE
-    //for(i=0;i<MAXVAL;i=i+STRIDE)
-    //{
-    //    PORTA = i & 0xff; 
-    //    PORTB = ((i >> 8) & 0xff);
-    //    
-    //    // DEADLOOP IF MISMATCH
-    //    if(EEDATA != (i & 0xff))
-    //    {
-    //        halt();
-    //    }
-    //}
+void led_scan()
+{
+    uint8_t shift = 1;
+    do
+    {
+       shift << 1;
+       io_data_write(shift, 0x1000);
+    } while (shift < 0x80);
+    do
+    {
+       shift >> 1;
+       io_data_write(shift, 0x1000);
+    } while (shift > 0x1);
+}
+
+void led_scan_noshift(uint16_t sleep)
+{
+    io_data_write(0x01, sleep);
+    io_data_write(0x02, sleep);
+    io_data_write(0x04, sleep);
+    io_data_write(0x08, sleep);
+    io_data_write(0x10, sleep);
+    io_data_write(0x20, sleep);
+    io_data_write(0x40, sleep);
+    io_data_write(0x80, sleep);
+    io_data_write(0x40, sleep);
+    io_data_write(0x20, sleep);
+    io_data_write(0x10, sleep);
+    io_data_write(0x08, sleep);
+    io_data_write(0x04, sleep);
+    io_data_write(0x02, sleep);
+    io_data_write(0x01, sleep);
 }
 
 void main(void)
 {
 	while(1)
 	{
-		io_counter();
-	};
+	    //led_test();
+        led_scan_noshift(0x800);
+	}
 
     halt();
 }
 
+// LOAD GPIO RAM (RAM BACKED PORT)
+// WITH DATA = ADDRESS
+// for(uint16_t i=0;i<MAXVAL;i=i+STRIDE)
+// {
+//     //PORTA = i & 0xff; 
+//     //PORTB = ((i >> 8) & 0xff);
+//     EEDATA = i & 0xff;
+// 	nopsleep();
+// }
+//
+// READ BACK AND COMPARE
+//for(i=0;i<MAXVAL;i=i+STRIDE)
+//{
+//    PORTA = i & 0xff; 
+//    PORTB = ((i >> 8) & 0xff);
+//    
+//    // DEADLOOP IF MISMATCH
+//    if(EEDATA != (i & 0xff))
+//    {
+//        halt();
+//    }
+//}

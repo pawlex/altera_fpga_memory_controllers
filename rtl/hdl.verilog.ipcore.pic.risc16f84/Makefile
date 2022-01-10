@@ -2,7 +2,7 @@ SRC=main.c
 CC=/usr/local/bin/sdcc
 FAMILY=pic14
 PROC=16f84
-OPTS=--use-non-free --no-extended-instructions --no-warn-non-free --stack-size 8
+OPTS=--use-non-free --no-extended-instructions --no-warn-non-free --stack-size 8 --less-pedantic --disable-warning 312
 OPTS+=--out-fmt-ihx
 #OPTS+=--out-fmt-s19
 
@@ -17,5 +17,8 @@ clean:
 rom:
 	./intel2readmemh $(SRC:.c=.hex) > $(SRC:.c=.rom) || /bin/true
 
+flash: all rom 
+	./asm.sh
+	./prog.sh
 
 .PHONY: all clean

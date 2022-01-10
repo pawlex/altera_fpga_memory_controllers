@@ -28,9 +28,9 @@
 `define DESIGN_LEVEL_RESET
 `define ENABLE_PLL_0
 `define ENABLE_PLL_1
-`define ENABLE_UFM
-//`define ENABLE_PIC_M9K_ROM
-`define ENABLE_PIC_M9K_RAM_AS_ROM
+//`define ENABLE_UFM
+`define ENABLE_PIC_M9K_ROM
+//`define ENABLE_PIC_M9K_RAM_AS_ROM
 `define ENABLE_PIC_M9K_RAM
 `define PIC14_16F
 
@@ -408,7 +408,7 @@ nios_system_sdram sdram_0 (
 `ifdef PIC14_16F
 wire PIC_CLK, PIC_2X_CLK;
 assign PIC_CLK = clk2p0;
-assign PIC_2X_CLK = ~clk4p0; // RAM/ROM should be latched on the falling edge. S&H
+assign PIC_2X_CLK = ~clk100p0; // RAM/ROM should be latched on the falling edge. S&H
 /* 8/~16 on same PLL works */
 /* 25/~50(sys) works */
 /* 50(sys)/100 works */
