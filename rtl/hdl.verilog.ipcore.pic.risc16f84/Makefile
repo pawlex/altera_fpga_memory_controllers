@@ -18,7 +18,8 @@ rom:
 	./intel2readmemh $(SRC:.c=.hex) > $(SRC:.c=.rom) || /bin/true
 
 flash: all rom 
+	./hex_mif.sh
 	./asm.sh
-	./prog.sh
+	./prog.sh reconfigure
 
 .PHONY: all clean

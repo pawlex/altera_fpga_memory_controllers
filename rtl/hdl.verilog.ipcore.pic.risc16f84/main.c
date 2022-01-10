@@ -3,16 +3,6 @@
 #include <stdio.h>
 //#include <unistd.h>
 
-/* Paul Komurka
- * test file for the soft-core pic16f84 (clk2x)
- * with ports A/B removed and replaced with a 
- * GPIO BUS.
- *
- * IO BUS:
- * ADDRESS [15:0] = { PORTB,PORTA }
- * DATA    [7:0 ] =   EEDATA
- */
-
 void halt(void)
 {
     while(1)
@@ -50,17 +40,23 @@ void led_test(void)
     io_data_write(0xAA, 0xF000);
 }
 
-void led_scan()
+void led_scan(uint16_t sleep)
 {
+   // uint8_t i=1;
+   // for(uint8_t j=64; j>0; j--)
+   // {
+   //     i=i<<1;
+   //     io_data_write(i, sleep);
+   // }
     uint8_t shift = 1;
     do
     {
-       shift << 1;
+       shift = shift << 1;
        io_data_write(shift, 0x1000);
     } while (shift < 0x80);
     do
     {
-       shift >> 1;
+       shift = shift >> 1;
        io_data_write(shift, 0x1000);
     } while (shift > 0x1);
 }
@@ -89,11 +85,23 @@ void main(void)
 	while(1)
 	{
 	    //led_test();
-        led_scan_noshift(0x800);
+        led_scan(0x1000);
+        //led_scan_noshift(0x800);
 	}
 
     halt();
 }
+
+/* Paul Komurka
+ * test file for the soft-core pic16f84 (clk2x)
+ * with ports A/B removed and replaced with a 
+ * GPIO BUS.
+ *
+ * IO BUS:
+ * ADDRESS [15:0] = { PORTB,PORTA }
+ * DATA    [7:0 ] =   EEDATA
+ */
+
 
 // LOAD GPIO RAM (RAM BACKED PORT)
 // WITH DATA = ADDRESS
