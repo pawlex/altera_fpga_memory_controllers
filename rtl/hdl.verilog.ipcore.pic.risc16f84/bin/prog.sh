@@ -5,9 +5,9 @@
 
 QUARTUS_PGM="/opt/intelFPGA_lite/21.1/quartus/bin/quartus_pgm"
 BLASTER_ID="-c 1"
-CHAIN_SOF="../../bin/chain_sof.cdf"
-CHAIN_POF_ALL="../../bin/chain_pof.cdf"
-#CHAIN_POF_UFM="../../bin/chain_sof.cdf"
+CHAIN_SOF="../../../bin/chain_sof.cdf"
+CHAIN_POF_ALL="../../../bin/chain_pof.cdf"
+#CHAIN_POF_UFM="../../../bin/chain_sof.cdf"
 DEFAULT_CDF=$CHAIN_SOF
 
 if [ -z $1 ]; then 

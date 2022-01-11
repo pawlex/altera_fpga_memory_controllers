@@ -93,7 +93,7 @@ module BeMicro_MAX10_top (
 `ifdef ENABLE_MAX10_ANALOG
 	/* MAX10 analog inputs */
 	// Voltage Level 3.3V
-	input [7:0] AIN,
+	inout [7:0] AIN,
 `endif
 
 `ifdef ENABLE_PUSHBUTTON	

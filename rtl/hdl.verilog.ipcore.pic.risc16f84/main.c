@@ -8,7 +8,9 @@
  * DATA    [07:0] =   EEDATA
 */
 
-#include <pic16regs.h>
+//#include <pic16regs.h>
+//#include "include/pic16regs.h"
+#include "include/pic16f84.h"
 #include <stdint.h>
 #include <stdio.h>
 //#include <unistd.h>

@@ -15,11 +15,11 @@ clean:
 	rm -f $(SRC:.c=.asm) $(SRC:.c=.cod) $(SRC:.c=.hex) $(SRC:.c=.lst) $(SRC:.c=.o) $(SRC:.c=.hex) $(SRC:.c=.rom) out.vvp dump.vcd
 
 rom:
-	./intel2readmemh $(SRC:.c=.hex) > $(SRC:.c=.rom) || /bin/true
+	./bin/intel2readmemh $(SRC:.c=.hex) > $(SRC:.c=.rom) || /bin/true
 
 flash: all rom 
-	./hex_mif.sh
-	./asm.sh
-	./prog.sh reconfigure
+	cd bin; ./hex_mif.sh
+	cd bin; ./asm.sh
+	cd bin; ./prog.sh reconfigure
 
 .PHONY: all clean
