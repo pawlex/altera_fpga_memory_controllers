@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-SIMFILES=( "./top_tb.v" "./dut_tb.v" )
-SIMFILES+=( "./risc16f84_clk2x.v" "./uart/uart.v" "./uart/uart_tx.v" "./uart/uart_rx.v" )
+SIMFILES=( "./tb.v" "./top.v" )
+SIMFILES+=( "./uart.v" "uart_rx.v" "uart_tx.v" )
 
 IVERILOG='iverilog'
 SIMFLAGS='-DSIMULATION'
@@ -15,7 +15,7 @@ OPTS="-g2005-sv -y$LIBPATH"
 GTKWAVEPID=`ps a | grep gtkwave | grep -v "grep" | awk '{print $1}'`
 
 # Compile the design simulation.
-if ! ${IVERILOG} $SIMFLAGS $OPTS -o $SIMOUTFL ${SIMFILES[@]}; then
+if ! ${IVERILOG} $SIMFLAGS ${OPTS} -o $SIMOUTFL ${SIMFILES[@]}; then
     echo "**** Simulation failed ****"
     exit
 fi

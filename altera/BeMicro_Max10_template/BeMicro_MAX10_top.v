@@ -16,7 +16,7 @@
 //`define ENABLE_ACCELEROMETER
 //`define ENABLE_SDRAM
 //`define ENABLE_SPI_FLASH
-//`define ENABLE_MAX10_ANALOG
+`define ENABLE_MAX10_ANALOG
 `define ENABLE_PUSHBUTTON
 `define ENABLE_LED_OUTPUT
 //`define ENABLE_EDGE_CONNECTOR
@@ -33,6 +33,7 @@
 //`define ENABLE_PIC_M9K_RAM_AS_ROM
 `define ENABLE_PIC_M9K_RAM
 `define PIC14_16F
+`define ENABLE_EXT_UART
 
 module BeMicro_MAX10_top (
 
@@ -95,6 +96,7 @@ module BeMicro_MAX10_top (
 	// Voltage Level 3.3V
 	inout [7:0] AIN,
 `endif
+
 
 `ifdef ENABLE_PUSHBUTTON	
 	/* pushbutton switch inputs */
@@ -283,6 +285,12 @@ module BeMicro_MAX10_top (
 	wire [15:0] DEBUG; assign {`DEBUG_HI,`DEBUG_LO} = DEBUG[15:0];
 `endif
 
+`ifdef ENABLE_EXT_UART
+	wire UART_RX; assign UART_RX = AIN[0];
+	wire UART_TX; assign AIN[1] = UART_TX;
+`endif
+
+
 `ifdef DESIGN_LEVEL_RESET
 	/* TODO:  Find out how to use Altera GSR */
 	parameter SYS_CLK_FREQ = 'd50_000_000;
@@ -409,17 +417,18 @@ nios_system_sdram sdram_0 (
 wire PIC_CLK, PIC_2X_CLK;
 assign PIC_CLK = clk2p0;
 assign PIC_2X_CLK = ~clk100p0; // RAM/ROM should be latched on the falling edge. S&H
+//assign PIC_2X_CLK_N = ~clk100p0; // RAM/ROM should be latched on the falling edge. S&H
 /* 8/~16 on same PLL works */
 /* 25/~50(sys) works */
 /* 50(sys)/100 works */
 
 
-assign DEBUG[15:12] = { PIC_CLK, pic_0_ram_we, pic_0_io_rd, pic_0_io_wr};
+//assign DEBUG[15:12] = { PIC_CLK, pic_0_ram_we, pic_0_io_rd, pic_0_io_wr};
 //assign DEBUG[5:0]   = pic_0_io_data[5:0];
 //assign DEBUG[11:6]  = pic_o_io_wr_data[5:0];
-assign DEBUG[11:08] = pic_0_ram_read_data[3:0];
-assign DEBUG[07:04] = pic_0_rom_data_byte_swapped[3:0];
-assign DEBUG[03:00] = pic_0_rom_address[3:0];
+//assign DEBUG[11:08] = pic_0_ram_read_data[3:0];
+//assign DEBUG[07:04] = pic_0_rom_data_byte_swapped[3:0];
+//assign DEBUG[03:00] = pic_0_rom_address[3:0];
 wire [15:0] pic_0_rom_data;
 wire [12:0] pic_0_rom_address; // 2M9K, so really only [9:0];
 wire [07:0] pic_0_ram_write_data;
@@ -427,7 +436,8 @@ wire [07:0] pic_0_ram_read_data;
 wire [09:0] pic_0_ram_address; // 1M9K, PIC can only address 9 bits.
 wire [15:0] pic_0_io_address;
 wire [07:0] pic_0_io_data;
-wire pic_0_ram_we, pic_0_io_rd, pic_0_io_wr;
+wire pic_0_ram_we, pic_0_io_rd, pic_0_io_wr, pic_0_interrupt;
+assign pic_0_interrupt = 1'b0;
 
 /* 
 	SDCC and gutils produces 16 byte intel-hex format,
@@ -461,14 +471,20 @@ risc16f84_clk2x
 		.aux_dat_io(pic_0_io_data),           // [7:0] Auxiliary data bus (tri-state bidirectional)
 		.aux_we_o(pic_0_io_wr),             // Auxiliary write strobe (H active)
 		.aux_re_o(pic_0_io_rd),             // Auxiliary read  strobe (H active) PK
-		.int0_i(1'b0),               // PORT-B(0) INT
+		.int0_i(pic_0_interrupt),               // PORT-B(0) INT
 		.reset_i(reset),              // Power-on reset (H active)
 		// TODO: Move both PIC and 2X to same PLL.
 		.clk_en_i(1'b1),             // Clock enable for all clocked logic
-		.clk_i(PIC_CLK)                 // Clock input
+		.clk_i(PIC_CLK),                 // Clock input
+		.uart_tx(UART_TX),
+		.uart_rx(UART_RX),
+		.uart_prescale('d833), // 2000000 / (300*8)
+		.debug(DEBUG)
 	);
 //
 `endif
+
+//assign DEBUG[1:0] = {UART_RX, UART_TX};
 
 `ifdef ENABLE_PIC_M9K_RAM_AS_ROM
 // Create a dual-ported RAM to act as a ROM for our PIC.
