@@ -1,4 +1,5 @@
 ## Shadow rom copy
+### Abandoned, because I couldn't figure out how to generate / flash the UFM independent of the POF/SOF file.  Looks like I'm stuck using Quartus
 Copy the user flash memory from the altera FPGA into M9K dual-port RAM to use as ROM for our microcontroller.
 * Why not just use the UFM directly?
 1. You can flash UFM independently of the configuration memory (flash), which is how the internal M9K ROM gets programmed.
